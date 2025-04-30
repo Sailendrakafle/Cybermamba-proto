@@ -14,7 +14,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!loading && (!networkStatus || !speedTest)) {
-      router.push('/'); // Redirect to home if permissions aren't granted
+      // Redirect to subscribe page if not authorized
+      router.push('/subscribe');
     }
   }, [loading, networkStatus, speedTest, router]);
 
@@ -37,7 +38,7 @@ export default function Dashboard() {
         <main className="flex-grow container mx-auto p-4 md:p-8">
           <Alert variant="destructive">
             <AlertDescription>
-              Network permissions are required to access the dashboard. Please grant permissions on the home page.
+              {error || 'You need to be a subscriber to access the dashboard. Please subscribe to continue.'}
             </AlertDescription>
           </Alert>
         </main>
