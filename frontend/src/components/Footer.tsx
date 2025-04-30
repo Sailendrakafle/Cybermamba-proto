@@ -10,12 +10,18 @@ export function Footer() {
           <div className="text-sm text-gray-600 dark:text-gray-400">
             © {new Date().getFullYear()} Cybermamba. All rights reserved.
           </div>
-          <div className="mt-4 md:mt-0">
+          <div className="mt-4 md:mt-0 flex items-center gap-6">
             <Link 
               href="/terms"
               className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             >
               Terms of Use
+            </Link>
+            <Link 
+              href="/subscribe"
+              className="text-sm text-white bg-blue-600 px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Subscribe
             </Link>
           </div>
         </div>
