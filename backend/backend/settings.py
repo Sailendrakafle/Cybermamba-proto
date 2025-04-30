@@ -130,7 +130,7 @@ NETWORK_RANGE = os.getenv('NETWORK_RANGE', '192.168.1.0/24')
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Development
+    "http://localhost:6262",  # Development
     os.getenv('FRONTEND_URL', ''),  # Production URL from environment
 ]
 

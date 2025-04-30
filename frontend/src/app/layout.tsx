@@ -3,7 +3,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SWRConfig } from 'swr';
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider as NextThemeProvider, type ThemeProviderProps } from "next-themes";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,6 +15,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const ThemeProvider = ({ children, ...props }: ThemeProviderProps) => {
+  return <NextThemeProvider {...props}>{children}</NextThemeProvider>;
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,10 +29,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider attribute="class">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+        >
           <SWRConfig 
             value={{
-              refreshInterval: 30000, // Refresh every 30 seconds
+              refreshInterval: 30000,
               revalidateOnFocus: true,
             }}
           >
