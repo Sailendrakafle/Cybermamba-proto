@@ -17,7 +17,7 @@ export function Header() {
 
   return (
     <>
-      <header className="bg-white dark:bg-gray-800 shadow-sm">
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <nav className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2">
@@ -29,7 +29,7 @@ export function Header() {
                   height={40}
                   className="transition-transform duration-200 hover:scale-105" 
                 />
-                <span className="text-xl font-bold text-gray-800 dark:text-white">
+                <span className="text-xl font-bold bg-gradient-to-r from-primary to-black dark:to-white bg-clip-text text-transparent">
                   CyberMamba
                 </span>
               </Link>
@@ -39,7 +39,7 @@ export function Header() {
             <div className="md:hidden">
               <button
                 onClick={toggleMenu}
-                className="text-gray-600 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white"
+                className="inline-flex items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground p-2"
               >
                 {isMenuOpen ? <IconX size={24} /> : <IconMenu2 size={24} />}
               </button>
@@ -47,24 +47,25 @@ export function Header() {
 
             {/* Desktop menu */}
             <div className="hidden md:flex items-center space-x-8">
-              <Link href="/" className="text-gray-600 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white">
+              <Link href="/" className="text-muted-foreground hover:text-primary transition-colors">
                 Home
               </Link>
-              <Link href="/about" className="text-gray-600 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white">
+              <Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">
                 About
               </Link>
-              <Link href="/news" className="text-gray-600 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white">
+              <Link href="/news" className="text-muted-foreground hover:text-primary transition-colors">
                 News
               </Link>
               <button
                 onClick={() => setIsAuthDialogOpen(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="btn-primary"
               >
                 Login
               </button>
               <button
                 onClick={toggleTheme}
-                className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200"
+                className="inline-flex items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground p-2"
+                aria-label="Toggle theme"
               >
                 {theme === 'dark' ? <IconSun size={20} /> : <IconMoon size={20} />}
               </button>
@@ -73,27 +74,28 @@ export function Header() {
 
           {/* Mobile menu */}
           {isMenuOpen && (
-            <div className="md:hidden mt-4 space-y-4">
-              <Link href="/" className="block text-gray-600 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white">
+            <div className="md:hidden mt-4 py-4 border-t border-border/40 space-y-4">
+              <Link href="/" className="block text-muted-foreground hover:text-primary transition-colors">
                 Home
               </Link>
-              <Link href="/about" className="block text-gray-600 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white">
+              <Link href="/about" className="block text-muted-foreground hover:text-primary transition-colors">
                 About
               </Link>
-              <Link href="/news" className="block text-gray-600 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white">
+              <Link href="/news" className="block text-muted-foreground hover:text-primary transition-colors">
                 News
               </Link>
               <button
                 onClick={() => setIsAuthDialogOpen(true)}
-                className="block w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-center"
+                className="w-full btn-primary"
               >
                 Login
               </button>
               <button
                 onClick={toggleTheme}
-                className="w-full text-left p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200"
+                className="w-full flex items-center justify-between p-2 rounded-md bg-accent text-accent-foreground"
               >
-                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+                {theme === 'dark' ? <IconSun size={20} /> : <IconMoon size={20} />}
               </button>
             </div>
           )}

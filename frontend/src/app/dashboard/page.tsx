@@ -1,41 +1,46 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { NetworkDevices } from '@/components/NetworkDevices';
 import { SpeedTest } from '@/components/SpeedTest';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useNetworkPermissions } from '@/lib/hooks/useNetworkPermissions';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 
 export default function Dashboard() {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
+  const { networkStatus, speedTest, loading, error } = useNetworkPermissions();
 
   useEffect(() => {
-    // Check if user is authenticated by making a request to the dashboard endpoint
-    fetch('http://localhost:5252/api/dashboard/', {
-      credentials: 'include'
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Not authenticated');
-      }
-      return response.json();
-    })
-    .catch(() => {
-      setError('Please log in to access the dashboard');
-      setTimeout(() => {
-        router.push('/');
-      }, 2000);
-    });
-  }, [router]);
+    if (!loading && (!networkStatus || !speedTest)) {
+      router.push('/'); // Redirect to home if permissions aren't granted
+    }
+  }, [loading, networkStatus, speedTest, router]);
 
-  if (error) {
+  if (loading) {
     return (
-      <div className="min-h-screen p-8">
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+      <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+        <main className="flex-grow container mx-auto p-4 md:p-8">
+          <div className="space-y-4">
+            <Skeleton className="h-[200px] w-full" />
+            <Skeleton className="h-[200px] w-full" />
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error || !networkStatus || !speedTest) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+        <main className="flex-grow container mx-auto p-4 md:p-8">
+          <Alert variant="destructive">
+            <AlertDescription>
+              Network permissions are required to access the dashboard. Please grant permissions on the home page.
+            </AlertDescription>
+          </Alert>
+        </main>
       </div>
     );
   }
@@ -52,8 +57,8 @@ export default function Dashboard() {
 
         <div className="grid gap-6">
           <div className="grid md:grid-cols-2 gap-6">
-            <SpeedTest />
-            <NetworkDevices />
+            <SpeedTest permissionsGranted={speedTest} />
+            <NetworkDevices permissionsGranted={networkStatus} />
           </div>
         </div>
       </main>

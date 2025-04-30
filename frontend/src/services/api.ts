@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5252/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5252';
 
 // Function to get CSRF token from cookies
 const getCSRFToken = () => {
@@ -64,32 +64,56 @@ export interface SubscriberData {
   agreed_to_terms: boolean;
 }
 
+interface NetworkResponse<T> {
+  data: T;
+  timestamp: string;
+  status: 'success' | 'error';
+}
+
+interface SpeedTestData {
+  speed_test: {
+    download: number;
+    upload: number;
+    ping: number;
+  };
+}
+
+interface NetworkDevicesData {
+  devices: Array<{
+    ip: string;
+    mac: string;
+    hostname: string;
+    last_seen: string;
+  }>;
+}
+
 export const authApi = {
   login: (credentials: LoginCredentials) =>
-    api.post<AuthResponse>('/login/', credentials),
+    api.post<AuthResponse>('/api/login/', credentials),
     
   register: (data: RegisterData) =>
-    api.post<AuthResponse>('/register/', data),
+    api.post<AuthResponse>('/api/register/', data),
     
   logout: () =>
-    api.post('/logout/'),
+    api.post('/api/logout/'),
 
   getCurrentUser: () =>
-    api.get<AuthResponse>('/user/current/'),
+    api.get<AuthResponse>('/api/user/current/'),
 
   checkSuperUser: () =>
-    api.get<AuthResponse>('/user/is-superuser/'),
+    api.get<AuthResponse>('/api/user/is-superuser/'),
 };
 
 export const subscriberApi = {
   subscribe: (data: SubscriberData) =>
-    api.post<{ id: number; name: string; email: string; created_at: string }>('/subscribe/', data),
+    api.post<{ id: number; name: string; email: string; created_at: string }>('/api/subscribe/', data),
 };
 
 export const networkApi = {
-  scanNetwork: () => api.get('/scan/'),
-  getSpeedTest: () => api.get('/speed/'),
-  getNetworkStats: () => api.get('/stats/'),
+  scanNetwork: () => api.get('/api/scan/'),
+  getSpeedTest: () => api.get<NetworkResponse<SpeedTestData>>('/api/speed/'),
+  getNetworkDevices: () => api.get<NetworkResponse<NetworkDevicesData>>('/api/devices/'),
+  getNetworkStats: () => api.get('/api/stats/'),
 };
 
 export const newsAPI = {

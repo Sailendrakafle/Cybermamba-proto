@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
+import { subscriberApi } from '@/services/api';
 
 export default function Subscribe() {
   const router = useRouter();
@@ -20,17 +21,11 @@ export default function Subscribe() {
     setError('');
 
     try {
-      const response = await fetch('/api/subscribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+      await subscriberApi.subscribe({
+        name: formData.name,
+        email: formData.email,
+        agreed_to_terms: formData.agreeToTerms
       });
-
-      if (!response.ok) {
-        throw new Error('Subscription failed. Please try again.');
-      }
 
       router.push('/subscribe/success');
     } catch (err) {
