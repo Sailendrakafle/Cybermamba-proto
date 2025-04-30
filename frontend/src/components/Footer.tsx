@@ -18,6 +18,18 @@ export function Footer() {
               Terms of Use
             </Link>
             <Link 
+              href="/dashboard"
+              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+            >
+              Dashboard
+            </Link>
+            <Link 
+              href="/admin"
+              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+            >
+              Admin Dashboard
+            </Link>
+            <Link 
               href="/subscribe"
               className="text-sm text-white bg-blue-600 px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
             >

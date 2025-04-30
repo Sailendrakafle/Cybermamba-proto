@@ -22,6 +22,9 @@ from .serializers import (
     SubscriberSerializer, NetworkScanSerializer, 
     SpeedTestSerializer, UserProfileSerializer
 )
+from django.contrib import messages
+from .models import NewsPost
+from .serializers import NewsPostSerializer
 
 logger = logging.getLogger(__name__)
 

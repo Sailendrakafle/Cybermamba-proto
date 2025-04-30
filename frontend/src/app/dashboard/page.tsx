@@ -12,8 +12,8 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check if user is authenticated by making a request to a protected endpoint
-    fetch('http://localhost:5252/api/stats/', {
+    // Check if user is authenticated by making a request to the dashboard endpoint
+    fetch('http://localhost:5252/api/dashboard/', {
       credentials: 'include'
     })
     .then(response => {
