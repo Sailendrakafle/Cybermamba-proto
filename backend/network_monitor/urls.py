@@ -12,5 +12,9 @@ urlpatterns = [
     path('speed/', views.speed_test, name='speed_test'),
     path('stats/', views.network_stats, name='network_stats'),
     path('subscribe/', views.subscribe, name='subscribe'),
+    path('login/', views.login_view, name='login'),
+    path('register/', views.register_view, name='register'),
     path('logout/', LogoutView.as_view(next_page='network_monitor:user-dashboard'), name='logout'),
+    path('user/current/', views.current_user, name='current-user'),
+    path('user/is-superuser/', views.is_superuser, name='is-superuser'),
 ]

@@ -8,12 +8,16 @@ import logging
 from django.conf import settings
 from rest_framework import status, viewsets, permissions
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, AllowAny
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Subscriber, NetworkScan, SpeedTest, UserProfile
+from django.contrib.auth import authenticate, login, logout
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie, csrf_protect
+from django.middleware.csrf import get_token
+from .models import Subscriber, NetworkScan, SpeedTest, UserProfile, CustomUser
 from .serializers import (
     SubscriberSerializer, NetworkScanSerializer, 
     SpeedTestSerializer, UserProfileSerializer
@@ -91,6 +95,122 @@ class UserDashboardView(APIView):
             return render(request, self.template_name, {'error': 'Subscriber profile not found'})
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
+@ensure_csrf_cookie
+def login_view(request):
+    """Handle user login"""
+    # Ensure CSRF token is set
+    get_token(request)
+    
+    username = request.data.get('username')
+    password = request.data.get('password')
+    
+    if not username or not password:
+        return Response({
+            'success': False,
+            'message': 'Please provide both username and password'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    user = authenticate(username=username, password=password)
+    
+    if user is not None:
+        if user.is_active:
+            login(request, user)
+            return Response({
+                'success': True,
+                'user': {
+                    'username': user.username,
+                    'email': user.email,
+                    'is_subscriber': user.is_subscriber
+                }
+            })
+        else:
+            return Response({
+                'success': False,
+                'message': 'Account is disabled'
+            }, status=status.HTTP_403_FORBIDDEN)
+    else:
+        return Response({
+            'success': False,
+            'message': 'Invalid credentials',
+            'showRegister': True  # Indicate that registration option should be shown
+        }, status=status.HTTP_401_UNAUTHORIZED)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@ensure_csrf_cookie
+def register_view(request):
+    """Handle user registration"""
+    # Ensure CSRF token is set
+    get_token(request)
+    
+    username = request.data.get('username')
+    password = request.data.get('password')
+    email = request.data.get('email')
+    name = request.data.get('name')
+    
+    if not all([username, password, email, name]):
+        return Response({
+            'success': False,
+            'message': 'Please provide all required fields'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    if CustomUser.objects.filter(username=username).exists():
+        return Response({
+            'success': False,
+            'message': 'Username already exists'
+        }, status=status.HTTP_400_BAD_REQUEST)
+        
+    if CustomUser.objects.filter(email=email).exists():
+        return Response({
+            'success': False,
+            'message': 'Email already registered'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        # Create user
+        user = CustomUser.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+            is_subscriber=True
+        )
+        
+        # Split name into first_name and last_name
+        names = name.split(' ', 1)
+        user.first_name = names[0]
+        user.last_name = names[1] if len(names) > 1 else ''
+        user.save()
+        
+        # Create subscriber profile
+        subscriber = Subscriber.objects.create(
+            user=user,
+            name=name,
+            email=email,
+            agreed_to_terms=True
+        )
+        
+        # Log the user in
+        login(request, user)
+        
+        return Response({
+            'success': True,
+            'user': {
+                'username': user.username,
+                'email': user.email,
+                'is_subscriber': user.is_subscriber
+            }
+        }, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        return Response({
+            'success': False,
+            'message': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@csrf_exempt
 def subscribe(request):
     """
     Handle new subscriber registration.
@@ -112,6 +232,8 @@ def subscribe(request):
         )
         # Create subscriber profile
         subscriber = serializer.save(user=user)
+        # Log the user in after registration
+        login(request, user)
         return Response(
             SubscriberSerializer(subscriber).data, 
             status=status.HTTP_201_CREATED
@@ -220,3 +342,28 @@ def network_stats(request):
             'error': 'Failed to get network stats',
             'details': str(e)
         }, status=500)
+
+@api_view(['GET'])
+def current_user(request):
+    if request.user.is_authenticated:
+        return Response({
+            'success': True,
+            'user': {
+                'username': request.user.username,
+                'email': request.user.email,
+                'is_subscriber': hasattr(request.user, 'subscriber')
+            }
+        })
+    return Response({'success': False, 'message': 'Not authenticated'})
+
+@api_view(['GET'])
+def is_superuser(request):
+    if request.user.is_authenticated:
+        return Response({
+            'success': True,
+            'user': {
+                'username': request.user.username,
+                'is_superuser': request.user.is_superuser
+            }
+        })
+    return Response({'success': False, 'message': 'Not authenticated'})
