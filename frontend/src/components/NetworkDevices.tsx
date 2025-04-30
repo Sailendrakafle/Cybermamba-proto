@@ -22,6 +22,8 @@ export function NetworkDevices() {
   if (error) return <div>Failed to load devices</div>;
   if (isLoading) return <div>Loading...</div>;
 
+  const devices = data?.data?.devices || [];
+
   return (
     <Card>
       <div className="flex justify-between items-center mb-4">
@@ -37,7 +39,7 @@ export function NetworkDevices() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {data?.devices?.map((device: Device) => (
+          {devices.map((device: Device) => (
             <TableRow key={device.mac}>
               <TableCell>{device.hostname}</TableCell>
               <TableCell>{device.ip}</TableCell>

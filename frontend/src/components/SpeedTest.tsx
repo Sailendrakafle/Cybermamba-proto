@@ -22,7 +22,7 @@ export function SpeedTest() {
   if (error) return <div>Failed to load speed test</div>;
   if (isLoading) return <div>Loading...</div>;
 
-  const speedData: SpeedTestData = data?.speed_test;
+  const speedData: SpeedTestData = data?.data?.speed_test;
 
   return (
     <Card>
