@@ -1,8 +1,12 @@
 from django.contrib import admin
 from django.utils import timezone
-from django.db.models import Count
+from django.db.models import Count, Avg
 from django.utils.html import format_html
+from django.shortcuts import render
+from django.contrib.admin.views.decorators import staff_member_required
+from django.utils.decorators import method_decorator
 from .models import Subscriber
+from .views import scan_network, speed_test
 
 @admin.register(Subscriber)
 class SubscriberAdmin(admin.ModelAdmin):
@@ -52,3 +56,39 @@ class SubscriberAdmin(admin.ModelAdmin):
 
     # Custom admin template that includes the summary statistics
     change_list_template = 'admin/subscriber/change_list.html'
+
+class DashboardView(admin.AdminSite):
+    def get_urls(self):
+        from django.urls import path
+        urls = super().get_urls()
+        custom_urls = [
+            path('dashboard/', self.admin_view(self.dashboard_view), name='admin-dashboard'),
+        ]
+        return custom_urls + urls
+
+    @staff_member_required
+    def dashboard_view(self, request):
+        # Get subscriber statistics
+        total_subscribers = Subscriber.objects.count()
+        active_subscribers = Subscriber.objects.filter(agreed_to_terms=True).count()
+        recent_subscribers = Subscriber.objects.order_by('-created_at')[:5]
+
+        # Get network statistics
+        network_data = scan_network(request).json()
+        speed_data = speed_test(request).json().get('speed_test', {})
+
+        context = {
+            'title': 'Network Monitor Dashboard',
+            'total_subscribers': total_subscribers,
+            'active_subscribers': active_subscribers,
+            'recent_subscribers': recent_subscribers,
+            'devices': network_data.get('devices', []),
+            'speed_test': speed_data,
+            'is_nav_sidebar_enabled': True,
+            'available_apps': self.get_app_list(request),
+        }
+
+        return render(request, 'admin/dashboard.html', context)
+
+# Register the custom admin site
+admin_site = DashboardView()
