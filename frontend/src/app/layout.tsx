@@ -3,6 +3,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SWRConfig } from 'swr';
+import { ThemeProvider } from "next-themes";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,14 +25,16 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SWRConfig 
-          value={{
-            refreshInterval: 30000, // Refresh every 30 seconds
-            revalidateOnFocus: true,
-          }}
-        >
-          {children}
-        </SWRConfig>
+        <ThemeProvider attribute="class">
+          <SWRConfig 
+            value={{
+              refreshInterval: 30000, // Refresh every 30 seconds
+              revalidateOnFocus: true,
+            }}
+          >
+            {children}
+          </SWRConfig>
+        </ThemeProvider>
       </body>
     </html>
   );
