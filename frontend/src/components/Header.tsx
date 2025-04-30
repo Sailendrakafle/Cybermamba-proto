@@ -18,7 +18,11 @@ export function Header() {
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <Link href="/" className="flex items-center space-x-2">
-              <img src="/cybermamba-logo.svg" alt="CyberMamba Logo" className="w-8 h-8" />
+              <img 
+                src="/cybermamba-logo.svg" 
+                alt="CyberMamba Logo" 
+                className="w-10 h-10 transition-transform duration-200 hover:scale-105" 
+              />
               <span className="text-xl font-bold text-gray-800 dark:text-white">
                 CyberMamba
               </span>
