@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { IconMenu2, IconX, IconSun, IconMoon } from '@tabler/icons-react';
 
@@ -18,10 +19,12 @@ export function Header() {
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <Link href="/" className="flex items-center space-x-2">
-              <img 
+              <Image 
                 src="/cybermamba-logo.svg" 
                 alt="CyberMamba Logo" 
-                className="w-10 h-10 transition-transform duration-200 hover:scale-105" 
+                width={40}
+                height={40}
+                className="transition-transform duration-200 hover:scale-105" 
               />
               <span className="text-xl font-bold text-gray-800 dark:text-white">
                 CyberMamba
