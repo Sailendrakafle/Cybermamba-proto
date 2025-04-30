@@ -7,8 +7,29 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
-from .models import Subscriber
-from .views import scan_network, speed_test
+from django.contrib.auth import get_user_model
+from .models import Subscriber, NetworkScan, SpeedTest, UserProfile, CustomUser
+
+User = get_user_model()
+
+class CustomUserAdmin(admin.ModelAdmin):
+    list_display = ('username', 'email', 'is_subscriber', 'is_superuser', 'date_joined')
+    list_filter = ('is_subscriber', 'is_superuser', 'is_staff', 'date_joined')
+    search_fields = ('username', 'email')
+    readonly_fields = ('date_joined', 'last_login')
+
+    def get_queryset(self, request):
+        # Only superusers can see other superusers
+        qs = super().get_queryset(request)
+        if not request.user.is_superuser:
+            qs = qs.filter(is_superuser=False)
+        return qs
+
+    def has_change_permission(self, request, obj=None):
+        # Only superusers can modify other superusers
+        if obj and obj.is_superuser and not request.user.is_superuser:
+            return False
+        return super().has_change_permission(request, obj)
 
 @admin.register(Subscriber)
 class SubscriberAdmin(admin.ModelAdmin):
@@ -25,114 +46,87 @@ class SubscriberAdmin(admin.ModelAdmin):
         return format_html('<span style="color: red;">Inactive</span>')
     subscription_status.short_description = 'Status'
 
-    def changelist_view(self, request, extra_context=None):
-        # Get today's statistics
-        today = timezone.now().date()
-        today_stats = Subscriber.objects.filter(
-            created_at__date=today
-        ).aggregate(
-            today_count=Count('id')
-        )
-
-        # Get total statistics
-        total_stats = Subscriber.objects.aggregate(
-            total_count=Count('id'),
-            active_count=Count('id', filter={'agreed_to_terms': True})
-        )
-
-        # Create the summary dictionary
-        summary_stats = {
-            'Total Subscriptions': total_stats['total_count'],
-            'Active Subscriptions': total_stats['active_count'],
-            'New Today': today_stats['today_count'],
-        }
-
-        # Add the stats to the extra context
-        extra_context = extra_context or {}
-        extra_context['summary_stats'] = summary_stats
-
-        return super().changelist_view(request, extra_context=extra_context)
-
     def get_queryset(self, request):
         return super().get_queryset(request).order_by('-created_at')
 
-    # Custom admin template that includes the summary statistics
-    change_list_template = 'admin/subscriber/change_list.html'
+@admin.register(NetworkScan)
+class NetworkScanAdmin(admin.ModelAdmin):
+    list_display = ('user', 'timestamp', 'device_count')
+    list_filter = ('timestamp', 'user')
+    date_hierarchy = 'timestamp'
+    readonly_fields = ('timestamp',)
 
-class DashboardView(admin.AdminSite):
+    def device_count(self, obj):
+        return len(obj.devices_found)
+    device_count.short_description = 'Devices Found'
+
+@admin.register(SpeedTest)
+class SpeedTestAdmin(admin.ModelAdmin):
+    list_display = ('user', 'timestamp', 'download_speed', 'upload_speed', 'ping')
+    list_filter = ('timestamp', 'user')
+    date_hierarchy = 'timestamp'
+    readonly_fields = ('timestamp',)
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'last_login_ip', 'last_network_scan', 'last_speed_test')
+    list_filter = ('last_network_scan', 'last_speed_test')
+    search_fields = ('user__username', 'user__email')
+    readonly_fields = ('last_login_ip', 'last_network_scan', 'last_speed_test')
+
+class NetworkMonitorAdminSite(admin.AdminSite):
     site_header = 'Network Monitor Administration'
     site_title = 'Network Monitor Admin'
-    index_title = 'Dashboard'
-
-    def get_urls(self):
-        from django.urls import path
-        urls = super().get_urls()
-        custom_urls = [
-            path('dashboard/', self.admin_view(self.dashboard_view), name='admin-dashboard'),
-        ]
-        return custom_urls + urls
+    index_title = 'Superroot Dashboard'
 
     def has_permission(self, request):
         """
-        Check if the user has permission to access the admin site
+        Only allow superusers to access this admin site
         """
-        return request.user.is_active and request.user.is_staff
+        return request.user.is_active and request.user.is_superuser
 
     @method_decorator(staff_member_required)
-    def dashboard_view(self, request):
-        if not self.has_permission(request):
-            raise PermissionDenied
-        
+    def index(self, request, extra_context=None):
+        if not request.user.is_superuser:
+            raise PermissionDenied("Only superusers can access this dashboard.")
+            
         try:
-            # Get subscriber statistics
+            # System statistics
+            total_users = User.objects.count()
             total_subscribers = Subscriber.objects.count()
             active_subscribers = Subscriber.objects.filter(agreed_to_terms=True).count()
-            recent_subscribers = Subscriber.objects.order_by('-created_at')[:5]
+            recent_network_scans = NetworkScan.objects.select_related('user')[:10]
+            recent_speed_tests = SpeedTest.objects.select_related('user')[:10]
 
-            # Get network statistics with error handling
-            try:
-                network_response = scan_network(request)
-                network_data = network_response.json() if network_response.status_code == 200 else {'devices': []}
-                if network_response.status_code != 200:
-                    messages.warning(request, 'Network scan encountered issues. Some data may be incomplete.')
-            except Exception as e:
-                network_data = {'devices': []}
-                messages.error(request, f'Failed to scan network: {str(e)}')
-
-            # Get speed test data with error handling
-            try:
-                speed_response = speed_test(request)
-                speed_data = speed_response.json().get('speed_test', {}) if speed_response.status_code == 200 else {}
-                if speed_response.status_code != 200:
-                    messages.warning(request, 'Speed test encountered issues. Some data may be incomplete.')
-            except Exception as e:
-                speed_data = {}
-                messages.error(request, f'Failed to perform speed test: {str(e)}')
-
-            context = {
-                'title': 'Network Monitor Dashboard',
-                'total_subscribers': total_subscribers,
-                'active_subscribers': active_subscribers,
-                'recent_subscribers': recent_subscribers,
-                'devices': network_data.get('devices', []),
-                'speed_test': speed_data,
-                'is_nav_sidebar_enabled': True,
-                'available_apps': self.get_app_list(request),
-                'has_permission': self.has_permission(request),
+            # Additional statistics
+            today = timezone.now().date()
+            today_stats = {
+                'new_users': User.objects.filter(date_joined__date=today).count(),
+                'network_scans': NetworkScan.objects.filter(timestamp__date=today).count(),
+                'speed_tests': SpeedTest.objects.filter(timestamp__date=today).count(),
             }
 
-            return render(request, 'admin/dashboard.html', context)
+            context = {
+                'title': 'Superroot Dashboard',
+                'total_users': total_users,
+                'total_subscribers': total_subscribers,
+                'active_subscribers': active_subscribers,
+                'recent_network_scans': recent_network_scans,
+                'recent_speed_tests': recent_speed_tests,
+                'today_stats': today_stats,
+                **(extra_context or {})
+            }
+            
+            return super().index(request, context)
             
         except Exception as e:
             messages.error(request, f'Dashboard error: {str(e)}')
-            context = {
-                'title': 'Dashboard Error',
-                'error': str(e),
-                'is_nav_sidebar_enabled': True,
-                'available_apps': self.get_app_list(request),
-                'has_permission': self.has_permission(request),
-            }
-            return render(request, 'admin/dashboard.html', context)
+            return super().index(request, {'error': str(e)})
 
-# Register the custom admin site
-admin_site = DashboardView()
+# Register models with the custom admin site
+admin_site = NetworkMonitorAdminSite(name='networkmonitor')
+admin_site.register(CustomUser, CustomUserAdmin)
+admin_site.register(Subscriber, SubscriberAdmin)
+admin_site.register(NetworkScan, NetworkScanAdmin)
+admin_site.register(SpeedTest, SpeedTestAdmin)
+admin_site.register(UserProfile, UserProfileAdmin)

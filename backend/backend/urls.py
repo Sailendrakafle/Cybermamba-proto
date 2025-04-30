@@ -17,13 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from network_monitor.admin import admin_site
-from network_monitor.views import scan_network, speed_test, network_stats, subscribe, index
+from network_monitor.views import index
 
 urlpatterns = [
     path('', index, name='index'),
-    path('admin/', admin_site.urls),
-    path('api/scan/', scan_network, name='scan_network'),
-    path('api/speed/', speed_test, name='speed_test'),
-    path('api/stats/', network_stats, name='network_stats'),
-    path('api/subscribe/', subscribe, name='subscribe'),
+    path('admin/', admin.site.urls),  # Default admin interface
+    path('superroot/', admin_site.urls),  # Superuser-only admin interface
+    path('api/', include('network_monitor.urls')),  # Network monitor API endpoints
 ]
