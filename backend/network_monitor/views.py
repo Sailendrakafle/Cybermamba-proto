@@ -367,3 +367,18 @@ def is_superuser(request):
             }
         })
     return Response({'success': False, 'message': 'Not authenticated'})
+
+class NewsPostViewSet(viewsets.ModelViewSet):
+    queryset = NewsPost.objects.all()
+    serializer_class = NewsPostSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        return super().get_permissions()
+
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return NewsPost.objects.all()
+        return NewsPost.objects.filter(is_published=True)

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Subscriber, UserProfile, NetworkScan, SpeedTest
+from .models import Subscriber, UserProfile, NetworkScan, SpeedTest, NewsPost
 
 User = get_user_model()
 
@@ -36,3 +36,9 @@ class SubscriberSerializer(serializers.ModelSerializer):
         model = Subscriber
         fields = ['id', 'name', 'email', 'agreed_to_terms', 'created_at', 'user']
         read_only_fields = ['id', 'created_at', 'user']
+
+class NewsPostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NewsPost
+        fields = ['id', 'title', 'summary', 'content', 'image', 'publish_date', 'is_published', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']

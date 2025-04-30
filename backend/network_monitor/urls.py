@@ -1,7 +1,11 @@
-from django.urls import path
+from django.urls import path, include
 from django.contrib.auth.views import LogoutView
+from rest_framework.routers import DefaultRouter
 from . import views
 from .admin import admin_site
+
+router = DefaultRouter()
+router.register(r'news', views.NewsPostViewSet)
 
 app_name = 'network_monitor'  # Add unique app namespace
 
@@ -17,4 +21,5 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(next_page='network_monitor:user-dashboard'), name='logout'),
     path('user/current/', views.current_user, name='current-user'),
     path('user/is-superuser/', views.is_superuser, name='is-superuser'),
+    path('api/', include(router.urls)),
 ]

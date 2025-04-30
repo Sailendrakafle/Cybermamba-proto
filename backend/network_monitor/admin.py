@@ -8,7 +8,7 @@ from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth import get_user_model
-from .models import Subscriber, NetworkScan, SpeedTest, UserProfile, CustomUser
+from .models import Subscriber, NetworkScan, SpeedTest, UserProfile, CustomUser, NewsPost
 
 User = get_user_model()
 
@@ -74,6 +74,15 @@ class UserProfileAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'user__email')
     readonly_fields = ('last_login_ip', 'last_network_scan', 'last_speed_test')
 
+@admin.register(NewsPost)
+class NewsPostAdmin(admin.ModelAdmin):
+    list_display = ('title', 'publish_date', 'is_published', 'created_at')
+    list_filter = ('is_published', 'publish_date')
+    search_fields = ('title', 'summary', 'content')
+    ordering = ('-publish_date',)
+    date_hierarchy = 'publish_date'
+    fields = ('title', 'summary', 'content', 'image', 'publish_date', 'is_published')
+
 class NetworkMonitorAdminSite(admin.AdminSite):
     site_header = 'Network Monitor Administration'
     site_title = 'Network Monitor Admin'
@@ -95,10 +104,13 @@ class NetworkMonitorAdminSite(admin.AdminSite):
             total_users = User.objects.count()
             total_subscribers = Subscriber.objects.count()
             active_subscribers = Subscriber.objects.filter(agreed_to_terms=True).count()
-            recent_network_scans = NetworkScan.objects.select_related('user')[:10]
-            recent_speed_tests = SpeedTest.objects.select_related('user')[:10]
+            
+            # News statistics
+            news_count = NewsPost.objects.count()
+            published_news_count = NewsPost.objects.filter(is_published=True).count()
+            recent_news = NewsPost.objects.all().order_by('-publish_date')[:10]
 
-            # Additional statistics
+            # Today's statistics
             today = timezone.now().date()
             today_stats = {
                 'new_users': User.objects.filter(date_joined__date=today).count(),
@@ -111,8 +123,9 @@ class NetworkMonitorAdminSite(admin.AdminSite):
                 'total_users': total_users,
                 'total_subscribers': total_subscribers,
                 'active_subscribers': active_subscribers,
-                'recent_network_scans': recent_network_scans,
-                'recent_speed_tests': recent_speed_tests,
+                'news_count': news_count,
+                'published_news_count': published_news_count,
+                'recent_news': recent_news,
                 'today_stats': today_stats,
                 **(extra_context or {})
             }
@@ -130,3 +143,4 @@ admin_site.register(Subscriber, SubscriberAdmin)
 admin_site.register(NetworkScan, NetworkScanAdmin)
 admin_site.register(SpeedTest, SpeedTestAdmin)
 admin_site.register(UserProfile, UserProfileAdmin)
+admin_site.register(NewsPost, NewsPostAdmin)

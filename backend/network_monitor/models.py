@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
+from django.utils import timezone
 
 class CustomUser(AbstractUser):
     is_subscriber = models.BooleanField(default=False)
@@ -48,3 +49,19 @@ class SpeedTest(models.Model):
     
     class Meta:
         ordering = ['-timestamp']
+
+class NewsPost(models.Model):
+    title = models.CharField(max_length=200)
+    summary = models.TextField(max_length=500)
+    content = models.TextField()
+    image = models.ImageField(upload_to='news_images/', null=True, blank=True)
+    publish_date = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_published = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-publish_date']
+
+    def __str__(self):
+        return self.title

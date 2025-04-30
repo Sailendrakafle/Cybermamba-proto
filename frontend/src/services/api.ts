@@ -58,6 +58,12 @@ export interface AuthResponse {
   message?: string;
 }
 
+export interface SubscriberData {
+  name: string;
+  email: string;
+  agreed_to_terms: boolean;
+}
+
 export const authApi = {
   login: (credentials: LoginCredentials) =>
     api.post<AuthResponse>('/login/', credentials),
@@ -75,8 +81,25 @@ export const authApi = {
     api.get<AuthResponse>('/user/is-superuser/'),
 };
 
+export const subscriberApi = {
+  subscribe: (data: SubscriberData) =>
+    api.post<{ id: number; name: string; email: string; created_at: string }>('/subscribe/', data),
+};
+
 export const networkApi = {
   scanNetwork: () => api.get('/scan/'),
   getSpeedTest: () => api.get('/speed/'),
   getNetworkStats: () => api.get('/stats/'),
+};
+
+export const newsAPI = {
+  getNews: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/news/`, {
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch news');
+    }
+    return response.json();
+  },
 };
