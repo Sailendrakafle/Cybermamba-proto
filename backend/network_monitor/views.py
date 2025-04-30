@@ -7,12 +7,21 @@ import socket
 import logging
 from django.conf import settings
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAdminUser
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.exceptions import PermissionDenied
 from rest_framework.response import Response
 from .models import Subscriber
 from .serializers import SubscriberSerializer
 
 logger = logging.getLogger(__name__)
+
+def staff_required(user):
+    """Check if user is staff member"""
+    if not user.is_staff:
+        raise PermissionDenied
+    return True
 
 def index(request):
     """
@@ -31,6 +40,8 @@ def index(request):
     }
     return JsonResponse(api_info)
 
+@login_required
+@user_passes_test(staff_required)
 def scan_network(request):
     # Get network range from settings or use default
     network = getattr(settings, 'NETWORK_RANGE', '192.168.1.0/24')
@@ -65,6 +76,8 @@ def scan_network(request):
         
     return JsonResponse({'devices': devices})
 
+@login_required
+@user_passes_test(staff_required)
 def speed_test(request):
     try:
         st = speedtest.Speedtest()
@@ -88,6 +101,8 @@ def speed_test(request):
             'details': str(e)
         }, status=500)
 
+@login_required
+@user_passes_test(staff_required)
 def network_stats(request):
     try:
         # Get devices

@@ -5,6 +5,8 @@ from django.utils.html import format_html
 from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
+from django.contrib import messages
+from django.core.exceptions import PermissionDenied
 from .models import Subscriber
 from .views import scan_network, speed_test
 
@@ -58,6 +60,10 @@ class SubscriberAdmin(admin.ModelAdmin):
     change_list_template = 'admin/subscriber/change_list.html'
 
 class DashboardView(admin.AdminSite):
+    site_header = 'Network Monitor Administration'
+    site_title = 'Network Monitor Admin'
+    index_title = 'Dashboard'
+
     def get_urls(self):
         from django.urls import path
         urls = super().get_urls()
@@ -66,29 +72,67 @@ class DashboardView(admin.AdminSite):
         ]
         return custom_urls + urls
 
-    @staff_member_required
+    def has_permission(self, request):
+        """
+        Check if the user has permission to access the admin site
+        """
+        return request.user.is_active and request.user.is_staff
+
+    @method_decorator(staff_member_required)
     def dashboard_view(self, request):
-        # Get subscriber statistics
-        total_subscribers = Subscriber.objects.count()
-        active_subscribers = Subscriber.objects.filter(agreed_to_terms=True).count()
-        recent_subscribers = Subscriber.objects.order_by('-created_at')[:5]
+        if not self.has_permission(request):
+            raise PermissionDenied
+        
+        try:
+            # Get subscriber statistics
+            total_subscribers = Subscriber.objects.count()
+            active_subscribers = Subscriber.objects.filter(agreed_to_terms=True).count()
+            recent_subscribers = Subscriber.objects.order_by('-created_at')[:5]
 
-        # Get network statistics
-        network_data = scan_network(request).json()
-        speed_data = speed_test(request).json().get('speed_test', {})
+            # Get network statistics with error handling
+            try:
+                network_response = scan_network(request)
+                network_data = network_response.json() if network_response.status_code == 200 else {'devices': []}
+                if network_response.status_code != 200:
+                    messages.warning(request, 'Network scan encountered issues. Some data may be incomplete.')
+            except Exception as e:
+                network_data = {'devices': []}
+                messages.error(request, f'Failed to scan network: {str(e)}')
 
-        context = {
-            'title': 'Network Monitor Dashboard',
-            'total_subscribers': total_subscribers,
-            'active_subscribers': active_subscribers,
-            'recent_subscribers': recent_subscribers,
-            'devices': network_data.get('devices', []),
-            'speed_test': speed_data,
-            'is_nav_sidebar_enabled': True,
-            'available_apps': self.get_app_list(request),
-        }
+            # Get speed test data with error handling
+            try:
+                speed_response = speed_test(request)
+                speed_data = speed_response.json().get('speed_test', {}) if speed_response.status_code == 200 else {}
+                if speed_response.status_code != 200:
+                    messages.warning(request, 'Speed test encountered issues. Some data may be incomplete.')
+            except Exception as e:
+                speed_data = {}
+                messages.error(request, f'Failed to perform speed test: {str(e)}')
 
-        return render(request, 'admin/dashboard.html', context)
+            context = {
+                'title': 'Network Monitor Dashboard',
+                'total_subscribers': total_subscribers,
+                'active_subscribers': active_subscribers,
+                'recent_subscribers': recent_subscribers,
+                'devices': network_data.get('devices', []),
+                'speed_test': speed_data,
+                'is_nav_sidebar_enabled': True,
+                'available_apps': self.get_app_list(request),
+                'has_permission': self.has_permission(request),
+            }
+
+            return render(request, 'admin/dashboard.html', context)
+            
+        except Exception as e:
+            messages.error(request, f'Dashboard error: {str(e)}')
+            context = {
+                'title': 'Dashboard Error',
+                'error': str(e),
+                'is_nav_sidebar_enabled': True,
+                'available_apps': self.get_app_list(request),
+                'has_permission': self.has_permission(request),
+            }
+            return render(request, 'admin/dashboard.html', context)
 
 # Register the custom admin site
 admin_site = DashboardView()
