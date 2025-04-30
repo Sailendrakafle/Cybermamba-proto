@@ -16,9 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from network_monitor.views import scan_network, speed_test, network_stats, subscribe
+from network_monitor.views import scan_network, speed_test, network_stats, subscribe, index
 
 urlpatterns = [
+    path('', index, name='index'),
     path('admin/', admin.site.urls),
     path('api/scan/', scan_network, name='scan_network'),
     path('api/speed/', speed_test, name='speed_test'),

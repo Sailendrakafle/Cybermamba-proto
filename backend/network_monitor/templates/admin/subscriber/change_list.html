@@ -1,0 +1,21 @@
+{% extends "admin/change_list.html" %}
+{% load i18n %}
+
+{% block content_title %}
+    <h1>{% trans 'Subscriber Management' %}</h1>
+{% endblock %}
+
+{% block content %}
+    <div style="margin-bottom: 20px; padding: 10px; background-color: #f5f5f5; border-radius: 4px;">
+        <h2 style="margin-bottom: 10px;">Subscription Summary</h2>
+        <div style="display: flex; gap: 20px;">
+            {% for label, value in summary_stats.items %}
+            <div style="background-color: white; padding: 15px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <h3 style="margin: 0; color: #666; font-size: 14px;">{{ label }}</h3>
+                <p style="margin: 5px 0 0; font-size: 24px; font-weight: bold; color: #2c5282;">{{ value }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {{ block.super }}
+{% endblock %}

@@ -14,6 +14,23 @@ from .serializers import SubscriberSerializer
 
 logger = logging.getLogger(__name__)
 
+def index(request):
+    """
+    Root endpoint that provides API information
+    """
+    api_info = {
+        'name': 'CyberMamba Network Monitor API',
+        'version': '1.0',
+        'endpoints': {
+            'Network Scan': '/api/scan/',
+            'Speed Test': '/api/speed/',
+            'Network Stats': '/api/stats/',
+            'Subscribe': '/api/subscribe/',
+            'Admin Interface': '/admin/'
+        }
+    }
+    return JsonResponse(api_info)
+
 def scan_network(request):
     # Get network range from settings or use default
     network = getattr(settings, 'NETWORK_RANGE', '192.168.1.0/24')
