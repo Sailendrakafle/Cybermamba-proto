@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-^f)bmd!^ac#(lko7s*g1i*qp0p-7=nu#gdenif#ay-d^--dh=0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -130,8 +130,7 @@ NETWORK_RANGE = os.getenv('NETWORK_RANGE', '192.168.1.0/24')
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:6262",  # Development
-    os.getenv('FRONTEND_URL', ''),  # Production URL from environment
+    "http://localhost:3000",  # Frontend development server
 ]
 
 CORS_ALLOW_CREDENTIALS = True

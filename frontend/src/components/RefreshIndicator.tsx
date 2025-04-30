@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BiRefresh } from 'react-icons/bi';
+import { RefreshCw } from 'lucide-react';
 
 interface RefreshIndicatorProps {
   lastUpdated: Date;
@@ -23,14 +23,14 @@ export function RefreshIndicator({ lastUpdated, onRefresh }: RefreshIndicatorPro
   }, [lastUpdated]);
 
   return (
-    <div className="flex items-center gap-2 text-sm text-gray-500">
-      <span>Updated {timeAgo}</span>
+    <div className="flex items-center gap-2">
+      <span className="text-sm text-muted-foreground">Updated {timeAgo}</span>
       <button
         onClick={onRefresh}
-        className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+        className="inline-flex items-center justify-center rounded-md h-6 w-6 hover:bg-accent hover:text-accent-foreground transition-colors"
         aria-label="Refresh data"
       >
-        <BiRefresh className="w-5 h-5" />
+        <RefreshCw className="h-4 w-4" />
       </button>
     </div>
   );

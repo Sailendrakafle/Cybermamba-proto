@@ -1,4 +1,12 @@
-import { Card, Title, Grid, Metric, Text } from '@tremor/react';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AlertCircle } from "lucide-react";
 import useSWR from 'swr';
 import { networkApi } from '../services/api';
 import { RefreshIndicator } from './RefreshIndicator';
@@ -19,31 +27,63 @@ export function SpeedTest() {
     setLastUpdated(new Date());
   };
 
-  if (error) return <div>Failed to load speed test</div>;
-  if (isLoading) return <div>Loading...</div>;
+  if (error) return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Network Speed</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>Failed to load speed test. Please try again later.</AlertDescription>
+        </Alert>
+      </CardContent>
+    </Card>
+  );
+  
+  if (isLoading) return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <CardTitle>Network Speed</CardTitle>
+        <Skeleton className="h-4 w-20" />
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-3 gap-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="space-y-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-8 w-24" />
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   const speedData: SpeedTestData = data?.data?.speed_test;
 
   return (
     <Card>
-      <div className="flex justify-between items-center mb-4">
-        <Title>Network Speed</Title>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <CardTitle>Network Speed</CardTitle>
         <RefreshIndicator lastUpdated={lastUpdated} onRefresh={handleRefresh} />
-      </div>
-      <Grid numItems={3} className="gap-4 mt-4">
-        <div>
-          <Text>Download</Text>
-          <Metric>{speedData?.download} Mbps</Metric>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">Download</p>
+            <p className="text-2xl font-bold tracking-tight">{speedData?.download} Mbps</p>
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">Upload</p>
+            <p className="text-2xl font-bold tracking-tight">{speedData?.upload} Mbps</p>
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">Ping</p>
+            <p className="text-2xl font-bold tracking-tight">{speedData?.ping} ms</p>
+          </div>
         </div>
-        <div>
-          <Text>Upload</Text>
-          <Metric>{speedData?.upload} Mbps</Metric>
-        </div>
-        <div>
-          <Text>Ping</Text>
-          <Metric>{speedData?.ping} ms</Metric>
-        </div>
-      </Grid>
+      </CardContent>
     </Card>
   );
 }

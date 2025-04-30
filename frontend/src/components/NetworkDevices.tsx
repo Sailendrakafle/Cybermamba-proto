@@ -1,4 +1,20 @@
-import { Card, Title, Table, TableHead, TableRow, TableHeaderCell, TableBody, TableCell } from '@tremor/react';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AlertCircle } from "lucide-react";
 import useSWR from 'swr';
 import { networkApi } from '../services/api';
 import { RefreshIndicator } from './RefreshIndicator';
@@ -19,35 +35,70 @@ export function NetworkDevices() {
     setLastUpdated(new Date());
   };
 
-  if (error) return <div>Failed to load devices</div>;
-  if (isLoading) return <div>Loading...</div>;
+  if (error) return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Connected Devices</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>Failed to load devices. Please try again later.</AlertDescription>
+        </Alert>
+      </CardContent>
+    </Card>
+  );
+  
+  if (isLoading) return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <CardTitle>Connected Devices</CardTitle>
+        <Skeleton className="h-4 w-20" />
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          {[...Array(3)].map((_, i) => (
+            <Skeleton key={i} className="h-12 w-full" />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   const devices = data?.data?.devices || [];
 
   return (
     <Card>
-      <div className="flex justify-between items-center mb-4">
-        <Title>Connected Devices</Title>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <CardTitle>Connected Devices</CardTitle>
         <RefreshIndicator lastUpdated={lastUpdated} onRefresh={handleRefresh} />
-      </div>
-      <Table className="mt-5">
-        <TableHead>
-          <TableRow>
-            <TableHeaderCell>Hostname</TableHeaderCell>
-            <TableHeaderCell>IP Address</TableHeaderCell>
-            <TableHeaderCell>MAC Address</TableHeaderCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {devices.map((device: Device) => (
-            <TableRow key={device.mac}>
-              <TableCell>{device.hostname}</TableCell>
-              <TableCell>{device.ip}</TableCell>
-              <TableCell>{device.mac}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      </CardHeader>
+      <CardContent>
+        {devices.length === 0 ? (
+          <Alert>
+            <AlertDescription>No devices found on the network.</AlertDescription>
+          </Alert>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Hostname</TableHead>
+                <TableHead>IP Address</TableHead>
+                <TableHead>MAC Address</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {devices.map((device: Device) => (
+                <TableRow key={device.mac}>
+                  <TableCell>{device.hostname}</TableCell>
+                  <TableCell>{device.ip}</TableCell>
+                  <TableCell className="font-mono">{device.mac}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
     </Card>
   );
 }

@@ -16,9 +16,12 @@ export function Header() {
     <header className="bg-white dark:bg-gray-800 shadow-sm">
       <nav className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <Link href="/" className="text-xl font-bold text-gray-800 dark:text-white">
-              CyberMamba
+          <div className="flex items-center space-x-2">
+            <Link href="/" className="flex items-center space-x-2">
+              <img src="/cybermamba-logo.svg" alt="CyberMamba Logo" className="w-8 h-8" />
+              <span className="text-xl font-bold text-gray-800 dark:text-white">
+                CyberMamba
+              </span>
             </Link>
           </div>
 
