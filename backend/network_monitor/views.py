@@ -252,11 +252,28 @@ def scan_network(request):
     devices = []
     
     try:
-        # ARP scan for live hosts
+        # ARP scan for live hosts with timeout handling
         arp = ARP(pdst=network)
         ether = Ether(dst="ff:ff:ff:ff:ff:ff")
         packet = ether/arp
-        result = srp(packet, timeout=3, verbose=False)[0]
+        
+        try:
+            result = srp(packet, timeout=5, verbose=False)[0]
+        except Exception as e:
+            logger.error(f"Network scan timeout: {e}")
+            return Response(
+                {'error': 'Network scan timed out. Please try again.'},
+                status=status.HTTP_504_GATEWAY_TIMEOUT
+            )
+
+        # Get previous scan for comparison
+        try:
+            previous_scan = NetworkScan.objects.filter(user=request.user).latest('timestamp')
+            previous_devices = previous_scan.devices_found
+        except NetworkScan.DoesNotExist:
+            previous_devices = []
+
+        current_time = timezone.now()
         
         for sent, received in result:
             try:
@@ -264,16 +281,37 @@ def scan_network(request):
             except socket.herror as e:
                 logger.warning(f"Could not resolve hostname for {received.psrc}: {e}")
                 hostname = "Unknown"
+
+            # Check if device was seen in previous scan
+            previous_device = next(
+                (d for d in previous_devices if d.get('mac') == received.hwsrc),
+                None
+            )
                 
-            devices.append({
+            device = {
                 'ip': received.psrc,
                 'mac': received.hwsrc,
-                'hostname': hostname
-            })
+                'hostname': hostname,
+                'last_seen': current_time.isoformat(),
+                'status': 'online',
+                'first_seen': previous_device.get('first_seen', current_time.isoformat()) if previous_device else current_time.isoformat()
+            }
+            devices.append(device)
+
+        # Add previously seen devices as offline if not found in current scan
+        if previous_devices:
+            current_macs = {d['mac'] for d in devices}
+            for old_device in previous_devices:
+                if old_device['mac'] not in current_macs:
+                    old_device.update({
+                        'status': 'offline',
+                        'last_seen': old_device.get('last_seen', '')
+                    })
+                    devices.append(old_device)
             
         # Update user's last network scan time
         if hasattr(request.user, 'profile'):
-            request.user.profile.last_network_scan = timezone.now()
+            request.user.profile.last_network_scan = current_time
             request.user.profile.save()
         
         # Create NetworkScan record
@@ -281,7 +319,14 @@ def scan_network(request):
             user=request.user,
             devices_found=devices
         )
-        return Response(NetworkScanSerializer(scan).data)
+        
+        return Response({
+            'data': {
+                'devices': devices,
+                'timestamp': current_time.isoformat()
+            }
+        })
+        
     except Exception as e:
         logger.error(f"Error scanning network: {e}")
         return Response(
@@ -289,17 +334,57 @@ def scan_network(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-# Modified speed test view with permission checks
+class SpeedTestError(Exception):
+    def __init__(self, message: str, error_type: str = 'general'):
+        self.message = message
+        self.error_type = error_type
+        super().__init__(self.message)
+
 @api_view(['GET'])
 @permission_classes([IsSubscriber])
 def speed_test(request):
     try:
-        st = speedtest.Speedtest()
-        st.get_best_server()
+        st = speedtest.Speedtest(timeout=30)  # Set a 30-second timeout
         
-        download = round(st.download() / 1_000_000, 2)  # Convert to Mbps
-        upload = round(st.upload() / 1_000_000, 2)
-        ping = round(st.results.ping, 2)
+        # Get best server with timeout handling
+        try:
+            st.get_best_server()
+        except Exception as e:
+            logger.error(f"Failed to find speedtest server: {e}")
+            raise SpeedTestError(
+                "Unable to find a speed test server. Please try again later.",
+                "server_error"
+            )
+        
+        # Measure download speed
+        try:
+            download = round(st.download() / 1_000_000, 2)  # Convert to Mbps
+        except Exception as e:
+            logger.error(f"Download test failed: {e}")
+            raise SpeedTestError(
+                "Download speed test failed. Please check your connection.",
+                "download_error"
+            )
+        
+        # Measure upload speed
+        try:
+            upload = round(st.upload() / 1_000_000, 2)
+        except Exception as e:
+            logger.error(f"Upload test failed: {e}")
+            raise SpeedTestError(
+                "Upload speed test failed. Please check your connection.",
+                "upload_error"
+            )
+        
+        # Get ping
+        try:
+            ping = round(st.results.ping, 2)
+        except Exception as e:
+            logger.error(f"Ping test failed: {e}")
+            raise SpeedTestError(
+                "Latency test failed. Please check your connection.",
+                "ping_error"
+            )
         
         # Update user's last speed test time
         if hasattr(request.user, 'profile'):
@@ -313,13 +398,28 @@ def speed_test(request):
             upload_speed=upload,
             ping=ping
         )
+        
         return Response(SpeedTestSerializer(test).data)
-    except Exception as e:
-        logger.error(f"Speed test failed: {e}")
+        
+    except SpeedTestError as e:
+        logger.error(f"Speed test error: {e.message} (Type: {e.error_type})")
         return Response(
-            {'error': 'Speed test failed',
-            'details': str(e)
-        }, status=500)
+            {
+                'error': e.message,
+                'error_type': e.error_type
+            },
+            status=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error in speed test: {e}")
+        return Response(
+            {
+                'error': 'An unexpected error occurred during the speed test.',
+                'error_type': 'unknown',
+                'details': str(e)
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 @login_required
 @user_passes_test(staff_required)

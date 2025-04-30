@@ -66,16 +66,13 @@ export interface SubscriberData {
 
 interface NetworkResponse<T> {
   data: T;
-  timestamp: string;
-  status: 'success' | 'error';
 }
 
 interface SpeedTestData {
-  speed_test: {
-    download: number;
-    upload: number;
-    ping: number;
-  };
+  download_speed: number;
+  upload_speed: number;
+  ping: number;
+  timestamp: string;
 }
 
 interface NetworkDevicesData {
@@ -84,7 +81,10 @@ interface NetworkDevicesData {
     mac: string;
     hostname: string;
     last_seen: string;
+    status: 'online' | 'offline';
+    first_seen: string;
   }>;
+  timestamp: string;
 }
 
 export const authApi = {
@@ -111,8 +111,8 @@ export const subscriberApi = {
 
 export const networkApi = {
   scanNetwork: () => api.get('/api/scan/'),
-  getSpeedTest: () => api.get<NetworkResponse<SpeedTestData>>('/api/speed/'),
-  getNetworkDevices: () => api.get<NetworkResponse<NetworkDevicesData>>('/api/devices/'),
+  getSpeedTest: () => api.get<SpeedTestData>('/api/speed/'),
+  getNetworkDevices: () => api.get<NetworkResponse<NetworkDevicesData>>('/api/network/devices'),
   getNetworkStats: () => api.get('/api/stats/'),
 };
 

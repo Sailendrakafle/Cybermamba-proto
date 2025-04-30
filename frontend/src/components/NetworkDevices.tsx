@@ -11,12 +11,25 @@ import { Lock } from "lucide-react";
 import useSWR from 'swr';
 import { networkApi } from '../services/api';
 import { RefreshIndicator } from './RefreshIndicator';
+import { AxiosResponse } from 'axios';
+import { SWR_CONFIGS } from '@/lib/utils';
 
 interface NetworkDevice {
   ip: string;
   mac: string;
   hostname: string;
   last_seen: string;
+  status: 'online' | 'offline';
+  first_seen: string;
+}
+
+interface NetworkDevicesData {
+  devices: NetworkDevice[];
+  timestamp: string;
+}
+
+interface NetworkResponse<T> {
+  data: T;
 }
 
 interface NetworkDevicesProps {
@@ -24,16 +37,20 @@ interface NetworkDevicesProps {
 }
 
 export function NetworkDevices({ permissionsGranted }: NetworkDevicesProps) {
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSWR<NetworkResponse<NetworkDevicesData>>(
     permissionsGranted ? '/api/network/devices' : null,
-    networkApi.getNetworkDevices
+    async (url: string) => {
+      const response = await networkApi.getNetworkDevices();
+      return response.data;
+    },
+    SWR_CONFIGS.networkDevices
   );
 
   const handleRefresh = () => {
     mutate();
   };
 
-  const lastUpdated = data?.timestamp ? new Date(data.timestamp) : null;
+  const lastUpdated = data?.data?.timestamp ? new Date(data.data.timestamp) : null;
 
   if (!permissionsGranted) {
     return (
@@ -132,14 +149,33 @@ export function NetworkDevices({ permissionsGranted }: NetworkDevicesProps) {
                 <TableHead>Hostname</TableHead>
                 <TableHead>IP Address</TableHead>
                 <TableHead>MAC Address</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Last Seen</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {devices.map((device) => (
-                <TableRow key={device.mac}>
-                  <TableCell className="font-medium">{device.hostname || 'Unknown Device'}</TableCell>
+                <TableRow key={device.mac} className={device.status === 'offline' ? 'opacity-60' : ''}>
+                  <TableCell className="font-medium">
+                    {device.hostname || 'Unknown Device'}
+                    <div className="text-xs text-muted-foreground">
+                      First seen: {new Date(device.first_seen).toLocaleDateString()}
+                    </div>
+                  </TableCell>
                   <TableCell>{device.ip}</TableCell>
                   <TableCell className="font-mono text-muted-foreground">{device.mac}</TableCell>
+                  <TableCell>
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
+                      device.status === 'online' 
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
+                    }`}>
+                      {device.status}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    {device.last_seen ? new Date(device.last_seen).toLocaleString() : 'N/A'}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
