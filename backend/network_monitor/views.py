@@ -485,3 +485,8 @@ class NewsPostViewSet(viewsets.ModelViewSet):
         if self.request.user.is_staff:
             return NewsPost.objects.all()
         return NewsPost.objects.filter(is_published=True)
+
+class NewsViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = NewsPost.objects.filter(is_published=True)
+    serializer_class = NewsPostSerializer
+    permission_classes = [permissions.AllowAny]
