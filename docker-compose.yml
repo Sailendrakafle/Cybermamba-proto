@@ -28,7 +28,7 @@ services:
     ports:
       - "5252:8000"
     volumes:
-      - ./backend:/app/backend_dev:delegated
+      - ./backend:/app/backend_dev
       - backend_static:/app/staticfiles
     command: >
       sh -c "python manage.py migrate &&
@@ -44,7 +44,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend:/app:delegated
+      - ./frontend:/app
       - /app/node_modules
       - /app/.next
     depends_on:

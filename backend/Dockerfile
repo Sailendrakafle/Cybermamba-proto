@@ -20,5 +20,9 @@ RUN mkdir -p /app/staticfiles
 # Expose the port the app runs on
 EXPOSE 8000
 
+# Set appropriate environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
 # Command to run the application
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "backend.wsgi:application"]
