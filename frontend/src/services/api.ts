@@ -36,6 +36,48 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Add request interceptor to include authentication tokens
+api.interceptors.request.use(
+  (config) => {
+    // Get token from localStorage when in browser environment
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        config.headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor for error handling
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  async (error) => {
+    const originalRequest = error.config;
+    
+    // Handle 401 Unauthorized errors (token expired)
+    if (error.response && error.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      // Implement token refresh logic here if needed
+      
+      // For now, redirect to login or clear tokens
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token');
+        // You might want to redirect to login
+      }
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
 export interface LoginCredentials {
   username: string;
   password: string;
@@ -69,10 +111,15 @@ interface NetworkResponse<T> {
 }
 
 interface SpeedTestData {
-  download_speed: number;
-  upload_speed: number;
+  download: number;
+  upload: number;
   ping: number;
   timestamp: string;
+  server: {
+    host: string;
+    name: string;
+    location: string;
+  };
 }
 
 interface NetworkDevicesData {
@@ -85,6 +132,12 @@ interface NetworkDevicesData {
     first_seen: string;
   }>;
   timestamp: string;
+}
+
+interface SpeedTestStatus {
+  status: 'running' | 'completed' | 'error';
+  progress?: number;
+  phase?: 'download' | 'upload' | 'ping';
 }
 
 export const authApi = {
@@ -114,6 +167,12 @@ export const networkApi = {
   getSpeedTest: () => api.get<SpeedTestData>('/api/speed/'),
   getNetworkDevices: () => api.get<NetworkResponse<NetworkDevicesData>>('/api/network/devices'),
   getNetworkStats: () => api.get('/api/stats/'),
+  runSpeedTest: () => api.post('/api/network/speedtest'),
+  getSpeedTestHistory: () => api.get('/api/network/speedtest/history'),
+  // Add these new methods for the SpeedTest component
+  startSpeedTest: () => api.post<void>('/api/network/speedtest/start'),
+  getSpeedTestStatus: () => api.get<SpeedTestStatus>('/api/network/speedtest/status'),
+  getLatestSpeedTest: () => api.get<NetworkResponse<SpeedTestData>>('/api/network/speedtest/latest'),
 };
 
 export const newsAPI = {
@@ -127,3 +186,5 @@ export const newsAPI = {
     return response.json();
   },
 };
+
+export default api;

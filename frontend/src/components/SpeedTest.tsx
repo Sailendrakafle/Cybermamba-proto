@@ -1,210 +1,177 @@
-import React from 'react';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle, Lock, Wifi } from "lucide-react";
-import useSWR from 'swr';
-import { networkApi } from '../services/api';
-import { RefreshIndicator } from './RefreshIndicator';
-import { SWR_CONFIGS } from '@/lib/utils';
-import { Progress } from "@/components/ui/progress";
+import React, { useState, useEffect } from 'react';
+import { networkApi } from '@/services/api';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 
-interface SpeedTestData {
-  download_speed: number;
-  upload_speed: number;
+interface SpeedTestResult {
+  download: number;
+  upload: number;
   ping: number;
   timestamp: string;
+  server: {
+    host: string;
+    name: string;
+    location: string;
+  };
 }
 
-interface SpeedTestProps {
-  permissionsGranted: boolean;
-}
+export function SpeedTest() {
+  const [result, setResult] = useState<SpeedTestResult | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [progress, setProgress] = useState<number>(0);
+  const [error, setError] = useState<string | null>(null);
+  const [lastTestTime, setLastTestTime] = useState<Date | null>(null);
 
-interface SpeedTestError {
-  error: string;
-  error_type: 'server_error' | 'download_error' | 'upload_error' | 'ping_error' | 'unknown';
-  details?: string;
-}
-
-const getSpeedRating = (speed: number): { rating: string; color: string } => {
-  if (speed >= 100) return { rating: 'Excellent', color: 'text-green-500 dark:text-green-400' };
-  if (speed >= 50) return { rating: 'Good', color: 'text-blue-500 dark:text-blue-400' };
-  if (speed >= 25) return { rating: 'Fair', color: 'text-yellow-500 dark:text-yellow-400' };
-  return { rating: 'Poor', color: 'text-red-500 dark:text-red-400' };
-};
-
-const getPingRating = (ping: number): { rating: string; color: string } => {
-  if (ping < 20) return { rating: 'Excellent', color: 'text-green-500 dark:text-green-400' };
-  if (ping < 50) return { rating: 'Good', color: 'text-blue-500 dark:text-blue-400' };
-  if (ping < 100) return { rating: 'Fair', color: 'text-yellow-500 dark:text-yellow-400' };
-  return { rating: 'Poor', color: 'text-red-500 dark:text-red-400' };
-};
-
-export function SpeedTest({ permissionsGranted }: SpeedTestProps) {
-  const [loadingProgress, setLoadingProgress] = React.useState(0);
-  const loadingSteps = ['Connecting...', 'Testing download...', 'Testing upload...', 'Measuring latency...'];
-  const [currentStep, setCurrentStep] = React.useState(0);
-
-  const { data, error, isLoading, mutate } = useSWR<SpeedTestData>(
-    permissionsGranted ? '/api/network/speed' : null,
-    async () => {
-      const response = await networkApi.getSpeedTest();
-      return response.data;
-    },
-    SWR_CONFIGS.speedTest
-  );
-
-  React.useEffect(() => {
-    if (isLoading) {
-      const interval = setInterval(() => {
-        setLoadingProgress(prev => {
-          if (prev >= 95) return prev;
-          const increment = Math.floor(Math.random() * 15) + 5;
-          const next = Math.min(prev + increment, 95);
-          setCurrentStep(Math.floor((next / 95) * (loadingSteps.length - 1)));
-          return next;
-        });
-      }, 1000);
-
-      return () => {
-        clearInterval(interval);
-        setLoadingProgress(0);
-        setCurrentStep(0);
-      };
+  // Fetch the most recent speed test result
+  const fetchLatestResult = async () => {
+    try {
+      setIsLoading(true);
+      const response = await networkApi.getLatestSpeedTest();
+      if (response.data && response.data.data) {
+        setResult(response.data.data);
+        setLastTestTime(new Date(response.data.data.timestamp));
+      }
+    } catch (err) {
+      console.error('Error fetching latest speed test:', err);
+    } finally {
+      setIsLoading(false);
     }
-  }, [isLoading]);
-
-  const getErrorMessage = (error: any) => {
-    const speedTestError = error?.response?.data as SpeedTestError;
-    if (speedTestError?.error) {
-      return speedTestError.error;
-    }
-    return 'Failed to load speed test. Please try again later.';
   };
 
-  const handleRefresh = () => {
-    mutate();
+  // Run a new speed test
+  const runSpeedTest = async () => {
+    try {
+      setIsRunning(true);
+      setProgress(0);
+      setError(null);
+      
+      // Start the speed test
+      await networkApi.startSpeedTest();
+      
+      // Poll for results
+      const intervalId = setInterval(async () => {
+        try {
+          const status = await networkApi.getSpeedTestStatus();
+          if (status.data.status === 'completed') {
+            clearInterval(intervalId);
+            fetchLatestResult();
+            setIsRunning(false);
+            setProgress(100);
+          } else if (status.data.status === 'running') {
+            setProgress(status.data.progress || 
+              (status.data.phase === 'download' ? 30 : 
+               status.data.phase === 'upload' ? 60 : 10));
+          } else if (status.data.status === 'error') {
+            clearInterval(intervalId);
+            setError('Speed test failed. Please try again.');
+            setIsRunning(false);
+          }
+        } catch (err) {
+          clearInterval(intervalId);
+          setError('Failed to get speed test status.');
+          setIsRunning(false);
+        }
+      }, 2000);
+    } catch (err) {
+      setError('Failed to start speed test. Please try again.');
+      setIsRunning(false);
+    }
   };
 
-  const lastUpdated = data?.timestamp ? new Date(data.timestamp) : null;
+  useEffect(() => {
+    fetchLatestResult();
+  }, []);
 
-  if (!permissionsGranted) {
-    return (
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle>Network Speed</CardTitle>
-          <Lock className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <Alert>
-            <AlertDescription>
-              Please grant permissions to perform network speed tests.
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle>Network Speed</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{getErrorMessage(error)}</AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle>Network Speed</CardTitle>
-          <Skeleton className="h-4 w-20" />
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <Alert>
-              <AlertDescription>{loadingSteps[currentStep]}</AlertDescription>
-            </Alert>
-            <Progress value={loadingProgress} className="w-full" />
-            <div className="mt-4 grid grid-cols-3 gap-4">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="space-y-2">
-                  <Skeleton className="h-4 w-16" />
-                  <Skeleton className="h-8 w-24" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const speedData = data || { 
-    download_speed: 0, 
-    upload_speed: 0, 
-    ping: 0, 
-    timestamp: '' 
+  const formatSpeed = (speed: number) => {
+    return speed < 1 ? `${(speed * 1000).toFixed(0)} Kbps` : `${speed.toFixed(1)} Mbps`;
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-        <div className="flex items-center space-x-2">
-          <CardTitle>Network Speed</CardTitle>
-          <Wifi className="h-4 w-4 text-primary animate-pulse" />
+    <Card className="p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Network Speed Test</h2>
+        <div className="text-sm text-gray-500">
+          {lastTestTime && !isRunning ? (
+            <>Last test: {lastTestTime.toLocaleString()}</>
+          ) : isRunning ? (
+            <>Speed test in progress...</>
+          ) : (
+            <>No recent tests</>
+          )}
         </div>
-        <RefreshIndicator 
-          lastUpdated={lastUpdated} 
-          onRefresh={handleRefresh}
-          isLoading={isLoading}
-        />
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">Download</p>
-            <p className="text-2xl font-bold tracking-tight">
-              {speedData.download_speed.toFixed(1)} <span className="text-sm font-normal text-muted-foreground">Mbps</span>
-            </p>
-            <p className={`text-xs ${getSpeedRating(speedData.download_speed).color}`}>
-              {getSpeedRating(speedData.download_speed).rating}
-            </p>
-          </div>
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">Upload</p>
-            <p className="text-2xl font-bold tracking-tight">
-              {speedData.upload_speed.toFixed(1)} <span className="text-sm font-normal text-muted-foreground">Mbps</span>
-            </p>
-            <p className={`text-xs ${getSpeedRating(speedData.upload_speed).color}`}>
-              {getSpeedRating(speedData.upload_speed).rating}
-            </p>
-          </div>
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">Ping</p>
-            <p className="text-2xl font-bold tracking-tight">
-              {speedData.ping.toFixed(0)} <span className="text-sm font-normal text-muted-foreground">ms</span>
-            </p>
-            <p className={`text-xs ${getPingRating(speedData.ping).color}`}>
-              {getPingRating(speedData.ping).rating}
-            </p>
-          </div>
+      </div>
+
+      {error && (
+        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
+          <p>{error}</p>
         </div>
-      </CardContent>
+      )}
+
+      {isRunning && (
+        <div className="mb-4">
+          <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-blue-500"
+              style={{ width: `${progress}%`, transition: 'width 0.5s ease-in-out' }}
+            ></div>
+          </div>
+          <p className="text-center mt-2 text-sm text-gray-600">
+            {progress < 40 ? 'Testing download speed...' : 
+             progress < 80 ? 'Testing upload speed...' : 'Finalizing results...'}
+          </p>
+        </div>
+      )}
+
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="text-center p-3 bg-gray-50 rounded-lg">
+          <p className="text-sm font-medium text-gray-500 mb-1">Download</p>
+          {isLoading ? (
+            <Skeleton className="h-7 w-full" />
+          ) : (
+            <p className="text-lg font-bold">
+              {result ? formatSpeed(result.download) : '---'}
+            </p>
+          )}
+        </div>
+        <div className="text-center p-3 bg-gray-50 rounded-lg">
+          <p className="text-sm font-medium text-gray-500 mb-1">Upload</p>
+          {isLoading ? (
+            <Skeleton className="h-7 w-full" />
+          ) : (
+            <p className="text-lg font-bold">
+              {result ? formatSpeed(result.upload) : '---'}
+            </p>
+          )}
+        </div>
+        <div className="text-center p-3 bg-gray-50 rounded-lg">
+          <p className="text-sm font-medium text-gray-500 mb-1">Ping</p>
+          {isLoading ? (
+            <Skeleton className="h-7 w-full" />
+          ) : (
+            <p className="text-lg font-bold">
+              {result ? `${result.ping.toFixed(0)} ms` : '---'}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {result && !isRunning && (
+        <div className="text-sm text-gray-600 mb-4">
+          <p>Server: {result.server.name} ({result.server.location})</p>
+        </div>
+      )}
+
+      <div className="flex justify-center">
+        <Button 
+          onClick={runSpeedTest}
+          disabled={isRunning || isLoading}
+          className={isRunning ? "opacity-50 cursor-not-allowed" : ""}
+        >
+          {isRunning ? "Running Test..." : "Run Speed Test"}
+        </Button>
+      </div>
     </Card>
   );
 }
