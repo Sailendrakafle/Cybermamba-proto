@@ -14,8 +14,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project
 COPY . .
 
-# Run migrations and collect static files
-RUN python manage.py collectstatic --noinput
+# Create a directory for static files
+RUN mkdir -p /app/staticfiles
 
 # Expose the port the app runs on
 EXPOSE 8000

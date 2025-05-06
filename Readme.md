@@ -91,8 +91,8 @@ Cybermamba is a comprehensive network monitoring solution that combines a Next.j
 
 4. Access the application:
    - Frontend: http://localhost:3000
-   - Admin Dashboard: http://localhost:8000/admin
-   - API Documentation: http://localhost:8000/api/docs/
+   - Admin Dashboard: http://localhost:5252/admin
+   - API Documentation: http://localhost:5252/api/docs/
 
 ### Environment Variables for Docker
 
