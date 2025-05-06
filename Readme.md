@@ -15,6 +15,8 @@ Cybermamba is a comprehensive network monitoring solution that combines a Next.j
 - Admin dashboard for network oversight
 - RESTful API endpoints
 - Responsive design for all devices
+- Cyber news feed and updates
+- Interactive cybersecurity quiz
 
 ## Getting Started
 
@@ -25,12 +27,13 @@ Cybermamba is a comprehensive network monitoring solution that combines a Next.j
 * npm or yarn
 * Network monitoring tools (nmap, speedtest-cli)
 * Git
+* Docker and Docker Compose (for containerized deployment)
 
-### Installation
+### Standard Installation
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/yourusername/Cybermamba-proto.git
    cd Cybermamba-proto
    ```
 
@@ -67,6 +70,46 @@ Cybermamba is a comprehensive network monitoring solution that combines a Next.j
    NEXT_PUBLIC_API_URL=http://localhost:5252
    ```
 
+### Docker Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/Cybermamba-proto.git
+   cd Cybermamba-proto
+   ```
+
+2. Build and run with Docker Compose:
+   ```bash
+   docker-compose build
+   docker-compose up
+   ```
+
+3. Create a superuser for the Django admin:
+   ```bash
+   docker-compose exec backend python manage.py createsuperuser
+   ```
+
+4. Access the application:
+   - Frontend: http://localhost:3000
+   - Admin Dashboard: http://localhost:8000/admin
+   - API Documentation: http://localhost:8000/api/docs/
+
+### Environment Variables for Docker
+
+Docker Compose uses the following environment variables:
+
+Backend:
+- `DEBUG`: Set to False in production
+- `SECRET_KEY`: Your Django secret key
+- `ALLOWED_HOSTS`: Comma-separated list of allowed hosts
+- `NETWORK_RANGE`: Network range to scan (e.g. 172.18.0.0/16 in Docker)
+- `DATABASE_URL`: PostgreSQL connection string
+
+Frontend:
+- `NEXT_PUBLIC_API_URL`: URL to the backend API
+
+These variables are already configured in the docker-compose.yml file.
+
 ### Usage
 
 1. Start the backend server:
@@ -86,21 +129,75 @@ Cybermamba is a comprehensive network monitoring solution that combines a Next.j
 3. Access the application:
    - Frontend: http://localhost:3000
    - Admin Dashboard: http://localhost:5252/admin
+   - API Documentation: http://localhost:5252/api/docs/
 
 ## Project Structure
 
 ```
 Cybermamba-proto/
-├── backend/           # Django backend
+├── backend/               # Django backend
 │   ├── network_monitor/   # Main application
-│   └── backend/          # Project settings
-├── frontend/         # Next.js frontend
-│   ├── src/             # Source code
-│   │   ├── app/        # Pages and routes
-│   │   ├── components/ # React components
-│   │   └── services/   # API services
-│   └── public/         # Static assets
+│   │   ├── admin.py       # Admin panel configuration
+│   │   ├── models.py      # Database models
+│   │   ├── views.py       # API views and endpoints
+│   │   ├── urls.py        # API routing
+│   │   └── serializers.py # API data serialization
+│   └── backend/           # Project settings
+├── frontend/              # Next.js frontend
+│   ├── src/               # Source code
+│   │   ├── app/           # Pages and routes
+│   │   ├── components/    # React components
+│   │   └── services/      # API services
+│   └── public/            # Static assets
 ```
+
+## Key Features
+
+### Network Monitoring
+The system automatically discovers devices on your network and monitors their connectivity, providing real-time updates on device status.
+
+### Speed Testing
+Regular speed tests track your network performance over time, allowing you to identify trends and potential issues.
+
+### Subscriber Management
+Manage users who have access to monitoring capabilities with different permission levels.
+
+### Cybersecurity News
+Stay updated with the latest cybersecurity news and alerts directly in your dashboard.
+
+## Technology Stack
+
+- **Backend**: Django, Django REST Framework, SQLite (development) / PostgreSQL (production)
+- **Frontend**: Next.js, TypeScript, TailwindCSS, shadcn/ui
+- **Network Tools**: nmap, speedtest-cli
+- **Authentication**: JWT tokens
+
+## Docker Deployment
+
+### Architecture
+
+The Docker setup consists of three services:
+1. **PostgreSQL Database**: Persistent storage for application data
+2. **Django Backend**: API server with network monitoring capabilities
+3. **Next.js Frontend**: User interface for the monitoring system
+
+### Development with Docker
+
+For development purposes, you can use:
+```bash
+docker-compose up
+```
+
+This will start all services with hot-reloading enabled for both frontend and backend.
+
+### Production Deployment
+
+For production, consider using:
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+(Create a docker-compose.prod.yml with production-specific configurations)
 
 ## Contributing
 
@@ -113,3 +210,7 @@ Cybermamba-proto/
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Last Updated
+
+May 6, 2025

@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,7 +23,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-^f)bmd!^ac#(lko7s*g1i*qp0p
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # Application definition
 
@@ -43,6 +44,7 @@ AUTH_USER_MODEL = 'network_monitor.CustomUser'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  # Must be at the top
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Enable whitenoise for static file serving in production
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -82,6 +84,10 @@ DATABASES = {
     }
 }
 
+# Use PostgreSQL if DATABASE_URL is set (Docker environment)
+if os.getenv('DATABASE_URL'):
+    DATABASES['default'] = dj_database_url.config(conn_max_age=600)
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -118,6 +124,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Enable whitenoise for static file serving in production
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -148,6 +158,7 @@ NETWORK_RANGE = os.getenv('NETWORK_RANGE', '192.168.1.0/24')
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Next.js development server
+    "http://frontend:3000",   # Docker service name
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
@@ -173,29 +184,7 @@ CORS_ALLOW_HEADERS = [
 # Security Settings
 SESSION_COOKIE_SAMESITE = 'Lax'  # Required for cross-origin authentication
 CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
+CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", "http://frontend:3000"]
 CSRF_USE_SESSIONS = False  # Store CSRF token in cookie for easier access
 CSRF_COOKIE_HTTPONLY = False  # Must be False to allow JavaScript access
 SESSION_COOKIE_HTTPONLY = True
-
-# Rest Framework Settings
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
-}
-
-if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = True  # For development only
-    CSRF_COOKIE_SECURE = False
-    SESSION_COOKIE_SECURE = False
-else:
-    SECURE_SSL_REDIRECT = True
-    CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
