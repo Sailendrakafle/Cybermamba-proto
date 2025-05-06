@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15
@@ -28,7 +26,7 @@ services:
     ports:
       - "5252:8000"
     volumes:
-      - ./backend:/app/backend_dev
+      - ./backend:/app/backend_dev:cached
       - backend_static:/app/staticfiles
     command: >
       sh -c "python manage.py migrate &&
@@ -44,7 +42,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend:/app
+      - ./frontend:/app:cached
       - /app/node_modules
       - /app/.next
     depends_on:
