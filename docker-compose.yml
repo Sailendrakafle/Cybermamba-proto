@@ -24,7 +24,7 @@ services:
       - NETWORK_RANGE=172.18.0.0/16
       - DATABASE_URL=postgres://cybermamba:cybermamba@db/cybermamba_db
     ports:
-      - "8000:8000"
+      - "5252:8000"
     volumes:
       - ./backend:/app
     command: >
@@ -37,7 +37,7 @@ services:
       dockerfile: Dockerfile.dev
     restart: always
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_API_URL=http://localhost:5252
     ports:
       - "3000:3000"
     volumes:
