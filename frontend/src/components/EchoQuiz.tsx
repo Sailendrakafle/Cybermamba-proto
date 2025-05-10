@@ -59,7 +59,7 @@ export function EchoQuiz() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Cyber Security Quiz</CardTitle>
+        <CardTitle>EchoMon Security Quiz</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

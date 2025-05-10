@@ -41,7 +41,7 @@ export function RSSFeed() {
           
           setFeed(items);
         } catch (err) {
-          setError('Failed to load cybersecurity news feed');
+          setError('Failed to load EchoMon security news feed');
         } finally {
           setLoading(false);
         }
@@ -56,7 +56,7 @@ export function RSSFeed() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Cybersecurity News</CardTitle>
+          <CardTitle>EchoMon Security News</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -73,7 +73,7 @@ export function RSSFeed() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Cybersecurity News</CardTitle>
+          <CardTitle>EchoMon Security News</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-red-500">{error}</p>
@@ -85,7 +85,7 @@ export function RSSFeed() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Cybersecurity News</CardTitle>
+        <CardTitle>EchoMon Security News</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

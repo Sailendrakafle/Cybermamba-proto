@@ -121,7 +121,7 @@ export default function Home() {
             <RSSFeed />
           </div>
 
-          {/* Cyber Quiz Section */}
+          {/* EchoMon Quiz Section */}
           <div className="mt-8">
             <EchoQuiz />
           </div>
