@@ -39,7 +39,7 @@ def index(request):
     Root endpoint that provides API information
     """
     api_info = {
-        'name': 'CyberMamba Network Monitor API',
+        'name': 'EchoMon Network Monitor API',
         'version': '1.0',
         'endpoints': {
             'Network Scan': '/api/scan/',

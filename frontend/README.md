@@ -1,6 +1,6 @@
-# Cybermamba Network Monitor Frontend
+# EchoMon Network Monitor Frontend
 
-A modern, responsive Next.js frontend for the Cybermamba Network Monitoring system.
+A modern, responsive Next.js frontend for the EchoMon Network Monitoring system.
 
 ## Features
 

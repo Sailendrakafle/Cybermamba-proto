@@ -40,7 +40,7 @@ export default function Subscribe() {
       <div className="max-w-md mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle>Subscribe to CyberMamba</CardTitle>
+            <CardTitle>Subscribe to EchoMon</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">

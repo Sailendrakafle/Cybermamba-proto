@@ -7,7 +7,7 @@ import { useNetworkPermissions } from '@/lib/hooks/useNetworkPermissions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { RSSFeed } from '@/components/RSSFeed';
-import { CyberQuiz } from '@/components/CyberQuiz';
+import { EchoQuiz } from '@/components/EchoQuiz';
 import { useEffect, useState } from 'react';
 import { newsAPI } from '@/services/api';
 
@@ -43,7 +43,7 @@ export default function Home() {
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <main className="flex-grow container mx-auto p-4 md:p-8">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Welcome to Cybermamba</h1>
+          <h1 className="text-4xl font-bold mb-4">Welcome to EchoMon</h1>
           <p className="text-lg text-gray-600 dark:text-gray-300">
             Your comprehensive network monitoring solution
           </p>
@@ -64,7 +64,7 @@ export default function Home() {
         ) : !networkStatus || !speedTest ? (
           <Alert>
             <AlertDescription>
-              To use all features of Cybermamba, please grant permission to access your network status and perform speed tests. 
+              To use all features of EchoMon, please grant permission to access your network status and perform speed tests. 
               These permissions are required to:
               <ul className="list-disc list-inside mt-2">
                 <li>Monitor connected devices on your network</li>
@@ -123,7 +123,7 @@ export default function Home() {
 
           {/* Cyber Quiz Section */}
           <div className="mt-8">
-            <CyberQuiz />
+            <EchoQuiz />
           </div>
         </div>
       </main>

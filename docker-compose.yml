@@ -1,16 +1,20 @@
+name: echomon-proto
+
 services:
   db:
+    container_name: echomon-proto-db
     image: postgres:15
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
-      - POSTGRES_PASSWORD=cybermamba
-      - POSTGRES_USER=cybermamba
-      - POSTGRES_DB=cybermamba_db
+      - POSTGRES_PASSWORD=echomon
+      - POSTGRES_USER=echomon
+      - POSTGRES_DB=echomon_db
     ports:
       - "5432:5432"
 
   backend:
+    container_name: echomon-proto-backend
     build: 
       context: ./backend
       dockerfile: Dockerfile
@@ -22,7 +26,7 @@ services:
       - SECRET_KEY=changeme-in-production
       - ALLOWED_HOSTS=localhost,127.0.0.1,backend
       - NETWORK_RANGE=172.18.0.0/16
-      - DATABASE_URL=postgres://cybermamba:cybermamba@db/cybermamba_db
+      - DATABASE_URL=postgres://echomon:echomon@db/echomon_db
     ports:
       - "5252:8000"
     volumes:
@@ -33,6 +37,7 @@ services:
              python manage.py runserver 0.0.0.0:8000"
 
   frontend:
+    container_name: echomon-proto-frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev

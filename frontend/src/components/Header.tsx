@@ -23,14 +23,14 @@ export function Header() {
             <div className="flex items-center space-x-2">
               <Link href="/" className="flex items-center space-x-2">
                 <Image 
-                  src="/cybermamba-logo.svg" 
-                  alt="CyberMamba Logo" 
+                  src="/echomon-logo.svg" 
+                  alt="EchoMon Logo" 
                   width={40}
                   height={40}
                   className="transition-transform duration-200 hover:scale-105" 
                 />
                 <span className="text-xl font-bold bg-gradient-to-r from-primary to-black dark:to-white bg-clip-text text-transparent">
-                  CyberMamba
+                  EchoMon
                 </span>
               </Link>
             </div>

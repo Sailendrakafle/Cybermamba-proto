@@ -11,7 +11,7 @@ export default function SubscriptionSuccess() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p>
-              Thank you for subscribing to CyberMamba! We&apos;ve received your subscription request
+              Thank you for subscribing to EchoMon! We&apos;ve received your subscription request
               and will keep you updated with our latest news and features.
             </p>
             <div className="flex justify-center">

@@ -1,10 +1,10 @@
-# Cybermamba-proto
+# EchoMon-proto
 
-This is a prototype repository for the Cybermamba project.
+This is a prototype repository for the EchoMon project.
 
 ## Description
 
-Cybermamba is a comprehensive network monitoring solution that combines a Next.js frontend with a Django backend to provide real-time network device monitoring, speed testing, and performance metrics. The project aims to give users and administrators detailed insights into their network's health and performance through an intuitive interface.
+EchoMon is a comprehensive network monitoring solution that combines a Next.js frontend with a Django backend to provide real-time network device monitoring, speed testing, and performance metrics. The project aims to give users and administrators detailed insights into their network's health and performance through an intuitive interface.
 
 ## Features
 
@@ -33,8 +33,8 @@ Cybermamba is a comprehensive network monitoring solution that combines a Next.j
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/Cybermamba-proto.git
-   cd Cybermamba-proto
+   git clone https://github.com/yourusername/EchoMon-proto.git
+   cd EchoMon-proto
    ```
 
 2. Backend Setup:
@@ -74,8 +74,8 @@ Cybermamba is a comprehensive network monitoring solution that combines a Next.j
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/Cybermamba-proto.git
-   cd Cybermamba-proto
+   git clone https://github.com/yourusername/EchoMon-proto.git
+   cd EchoMon-proto
    ```
 
 2. Build and run with Docker Compose:
@@ -134,7 +134,7 @@ These variables are already configured in the docker-compose.yml file.
 ## Project Structure
 
 ```
-Cybermamba-proto/
+EchoMon-proto/
 ├── backend/               # Django backend
 │   ├── network_monitor/   # Main application
 │   │   ├── admin.py       # Admin panel configuration

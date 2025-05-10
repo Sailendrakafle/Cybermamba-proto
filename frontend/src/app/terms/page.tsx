@@ -7,7 +7,7 @@ export default function Terms() {
         <section>
           <h2 className="text-2xl font-semibold mb-4">1. Acceptance of Terms</h2>
           <p className="text-gray-600 dark:text-gray-300 mb-4">
-            By accessing and using CyberMamba's network monitoring services, you agree to be bound by these Terms of Use
+            By accessing and using EchoMon's network monitoring services, you agree to be bound by these Terms of Use
             and all applicable laws and regulations.
           </p>
         </section>
@@ -15,7 +15,7 @@ export default function Terms() {
         <section>
           <h2 className="text-2xl font-semibold mb-4">2. Use License</h2>
           <p className="text-gray-600 dark:text-gray-300 mb-4">
-            CyberMamba grants you a limited, non-exclusive, non-transferable license to use our network monitoring
+            EchoMon grants you a limited, non-exclusive, non-transferable license to use our network monitoring
             services for your internal business purposes.
           </p>
         </section>
@@ -39,7 +39,7 @@ export default function Terms() {
         <section>
           <h2 className="text-2xl font-semibold mb-4">5. Limitation of Liability</h2>
           <p className="text-gray-600 dark:text-gray-300 mb-4">
-            CyberMamba shall not be liable for any indirect, incidental, special, consequential, or punitive damages
+            EchoMon shall not be liable for any indirect, incidental, special, consequential, or punitive damages
             arising from your use of our services.
           </p>
         </section>

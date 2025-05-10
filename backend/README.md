@@ -1,4 +1,4 @@
-# Cybermamba Network Monitor Backend
+# EchoMon Network Monitor Backend
 
 A powerful Django-based backend service for network monitoring and device management.
 

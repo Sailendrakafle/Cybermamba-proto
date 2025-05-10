@@ -3,11 +3,11 @@ import React from 'react';
 export default function About() {
   return (
     <main className="min-h-screen p-8 max-w-4xl mx-auto">
-      <h1 className="text-4xl font-bold mb-6">About Cybermamba</h1>
+      <h1 className="text-4xl font-bold mb-6">About EchoMon</h1>
       
       <section className="space-y-6">
         <p className="text-lg">
-          Welcome to Cybermamba, your comprehensive network monitoring solution. Our platform
+          Welcome to EchoMon, your comprehensive network monitoring solution. Our platform
           provides real-time insights into your network performance and device connectivity.
         </p>
 
@@ -43,7 +43,7 @@ export default function About() {
         </div>
 
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-8">
-          Version 1.0.0 | © 2025 Cybermamba. All rights reserved.
+          Version 1.0.0 | © 2025 EchoMon. All rights reserved.
         </p>
       </section>
     </main>
