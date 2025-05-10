@@ -35,14 +35,14 @@ export default function News() {
 
   if (loading) {
     return (
-      <div className="min-h-screen p-8 max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8">Latest News</h1>
-        <div className="space-y-8">
+      <div>
+        <h1>Latest News</h1>
+        <div>
           {[1, 2, 3].map((i) => (
-            <div key={i} className="border dark:border-gray-700 rounded-lg p-6 animate-pulse">
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4"></div>
-              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+            <div key={i}>
+              <div></div>
+              <div></div>
+              <div></div>
             </div>
           ))}
         </div>
@@ -52,24 +52,24 @@ export default function News() {
 
   if (error) {
     return (
-      <div className="min-h-screen p-8 max-w-4xl mx-auto">
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-          <p className="text-red-600 dark:text-red-400">{error}</p>
+      <div>
+        <div>
+          <p>{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-8 max-w-4xl mx-auto">
-      <h1 className="text-4xl font-bold mb-8">Latest News</h1>
+    <div>
+      <h1>Latest News</h1>
       
-      <div className="space-y-8">
+      <div>
         {newsItems.map((item) => (
-          <Card key={item.id} className="hover:shadow-lg transition-shadow">
+          <Card key={item.id}>
             <CardHeader>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-500 dark:text-gray-400">
+              <div>
+                <span>
                   {new Date(item.publish_date).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
@@ -84,13 +84,12 @@ export default function News() {
                 <img
                   src={item.image}
                   alt={item.title}
-                  className="w-full h-48 object-cover rounded-md mb-4"
                 />
               )}
-              <p className="text-gray-600 dark:text-gray-300">
+              <p>
                 {item.summary}
               </p>
-              <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+              <div>
                 {item.content}
               </div>
             </CardContent>
@@ -98,7 +97,7 @@ export default function News() {
         ))}
         
         {newsItems.length === 0 && (
-          <div className="text-center p-8 text-gray-500 dark:text-gray-400">
+          <div>
             No news articles available at the moment.
           </div>
         )}

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { IconMenu2, IconX, IconSun, IconMoon } from '@tabler/icons-react';
-import { AuthDialog } from './AuthDialog';
+import { AuthDialog } from '../auth/AuthDialog';
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

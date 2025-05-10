@@ -54,56 +54,55 @@ export function RSSFeed() {
   // Show loading skeleton during SSR and initial client-side render
   if (!mounted || loading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>EchoMon Security News</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+      <div>
+        <div>
+          <h3>EchoMon Security News</h3>
+        </div>
+        <div>
+          <div>
             {[...Array(3)].map((_, i) => (
-              <Skeleton key={i} className="h-4 w-full" />
+              <div key={i}>Loading...</div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>EchoMon Security News</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-red-500">{error}</p>
-        </CardContent>
-      </Card>
+      <div>
+        <div>
+          <h3>EchoMon Security News</h3>
+        </div>
+        <div>
+          <p>{error}</p>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>EchoMon Security News</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
+    <div>
+      <div>
+        <h3>EchoMon Security News</h3>
+      </div>
+      <div>
+        <div>
           {feed.map((item, index) => (
-            <div key={index} className="space-y-1">
+            <div key={index}>
               <a 
                 href={item.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:underline block font-medium"
               >
                 {item.title}
               </a>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{item.date}</p>
+              <p>{item.date}</p>
             </div>
           ))}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

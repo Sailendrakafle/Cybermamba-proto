@@ -32,12 +32,13 @@ export function SubscribeDialog({ open, onOpenChange }: SubscribeDialogProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <div aria-hidden="true" />
+    <Dialog isOpen={open} onOpenChange={onOpenChange}>
       <div>
         <div>
-          <h2>Subscribe</h2>
-          {error && <p>{error}</p>}
+          <h2>Subscribe to EchoMon</h2>
+          <p>
+            Sign up to receive network monitoring alerts and updates.
+          </p>
           <form onSubmit={handleSubmit}>
             <div>
               <label htmlFor="name">
@@ -50,6 +51,7 @@ export function SubscribeDialog({ open, onOpenChange }: SubscribeDialogProps) {
                 required
               />
             </div>
+
             <div>
               <label htmlFor="email">
                 Email Address
@@ -61,6 +63,7 @@ export function SubscribeDialog({ open, onOpenChange }: SubscribeDialogProps) {
                 required
               />
             </div>
+
             <div>
               <button
                 type="button"

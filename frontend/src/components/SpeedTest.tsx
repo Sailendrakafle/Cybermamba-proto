@@ -89,10 +89,10 @@ export function SpeedTest() {
   };
 
   return (
-    <Card className="p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Network Speed Test</h2>
-        <div className="text-sm text-gray-500">
+    <div>
+      <div>
+        <h2>Network Speed Test</h2>
+        <div>
           {lastTestTime && !isRunning ? (
             <>Last test: {lastTestTime.toLocaleString()}</>
           ) : isRunning ? (
@@ -104,53 +104,52 @@ export function SpeedTest() {
       </div>
 
       {error && (
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
+        <div>
           <p>{error}</p>
         </div>
       )}
 
       {isRunning && (
-        <div className="mb-4">
-          <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+        <div>
+          <div>
             <div
-              className="h-full bg-blue-500"
-              style={{ width: `${progress}%`, transition: 'width 0.5s ease-in-out' }}
+              style={{ width: `${progress}%` }}
             ></div>
           </div>
-          <p className="text-center mt-2 text-sm text-gray-600">
+          <p>
             {progress < 40 ? 'Testing download speed...' : 
              progress < 80 ? 'Testing upload speed...' : 'Finalizing results...'}
           </p>
         </div>
       )}
 
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="text-center p-3 bg-gray-50 rounded-lg">
-          <p className="text-sm font-medium text-gray-500 mb-1">Download</p>
+      <div>
+        <div>
+          <p>Download</p>
           {isLoading ? (
-            <Skeleton className="h-7 w-full" />
+            <div>Loading...</div>
           ) : (
-            <p className="text-lg font-bold">
+            <p>
               {result ? formatSpeed(result.download) : '---'}
             </p>
           )}
         </div>
-        <div className="text-center p-3 bg-gray-50 rounded-lg">
-          <p className="text-sm font-medium text-gray-500 mb-1">Upload</p>
+        <div>
+          <p>Upload</p>
           {isLoading ? (
-            <Skeleton className="h-7 w-full" />
+            <div>Loading...</div>
           ) : (
-            <p className="text-lg font-bold">
+            <p>
               {result ? formatSpeed(result.upload) : '---'}
             </p>
           )}
         </div>
-        <div className="text-center p-3 bg-gray-50 rounded-lg">
-          <p className="text-sm font-medium text-gray-500 mb-1">Ping</p>
+        <div>
+          <p>Ping</p>
           {isLoading ? (
-            <Skeleton className="h-7 w-full" />
+            <div>Loading...</div>
           ) : (
-            <p className="text-lg font-bold">
+            <p>
               {result ? `${result.ping.toFixed(0)} ms` : '---'}
             </p>
           )}
@@ -158,20 +157,19 @@ export function SpeedTest() {
       </div>
 
       {result && !isRunning && (
-        <div className="text-sm text-gray-600 mb-4">
+        <div>
           <p>Server: {result.server.name} ({result.server.location})</p>
         </div>
       )}
 
-      <div className="flex justify-center">
-        <Button 
+      <div>
+        <button 
           onClick={runSpeedTest}
           disabled={isRunning || isLoading}
-          className={isRunning ? "opacity-50 cursor-not-allowed" : ""}
         >
           {isRunning ? "Running Test..." : "Run Speed Test"}
-        </Button>
+        </button>
       </div>
-    </Card>
+    </div>
   );
 }

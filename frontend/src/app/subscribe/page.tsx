@@ -36,16 +36,16 @@ export default function Subscribe() {
   };
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-md mx-auto">
+    <div>
+      <div>
         <Card>
           <CardHeader>
             <CardTitle>Subscribe to EchoMon</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit}>
               <div>
-                <label htmlFor="name" className="block text-sm font-medium mb-1">
+                <label htmlFor="name">
                   Name
                 </label>
                 <input
@@ -53,13 +53,12 @@ export default function Subscribe() {
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700"
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-1">
+                <label htmlFor="email">
                   Email Address
                 </label>
                 <input
@@ -67,36 +66,33 @@ export default function Subscribe() {
                   id="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700"
                   required
                 />
               </div>
 
-              <div className="flex items-center">
+              <div>
                 <input
                   type="checkbox"
                   id="terms"
                   checked={formData.agreeToTerms}
                   onChange={(e) => setFormData({ ...formData, agreeToTerms: e.target.checked })}
-                  className="mr-2"
                   required
                 />
-                <label htmlFor="terms" className="text-sm">
+                <label htmlFor="terms">
                   I agree to the{' '}
-                  <a href="/terms" className="text-blue-600 hover:underline">
+                  <a href="/terms">
                     Terms of Use
                   </a>
                 </label>
               </div>
 
               {error && (
-                <div className="text-red-500 text-sm">{error}</div>
+                <div>{error}</div>
               )}
 
               <button
                 type="submit"
                 disabled={isLoading || !formData.agreeToTerms}
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? 'Subscribing...' : 'Subscribe'}
               </button>

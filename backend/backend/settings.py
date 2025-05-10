@@ -20,6 +20,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-^f)bmd!^ac#(lko7s*g1i*qp0p-7=nu#gdenif#ay-d^--dh=0')
 
+# Placeholder for future migration to the config module
+# TODO: Migrate all settings to the config module structure
+# from config import *
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 

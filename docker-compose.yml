@@ -12,26 +12,42 @@ services:
       - POSTGRES_DB=echomon_db
     ports:
       - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - echomon-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "echomon"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
     container_name: echomon-proto-backend
     build: 
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: ../docker/backend/Dockerfile
     restart: always
     depends_on:
       - db
     environment:
-      - DEBUG=False
+      - DJANGO_ENV=production
       - SECRET_KEY=changeme-in-production
       - ALLOWED_HOSTS=localhost,127.0.0.1,backend
       - NETWORK_RANGE=172.18.0.0/16
-      - DATABASE_URL=postgres://echomon:echomon@db/echomon_db
+      - DB_NAME=echomon_db
+      - DB_USER=echomon
+      - DB_PASSWORD=echomon
+      - DB_HOST=db
+      - DB_PORT=5432
+      - CORS_ORIGINS=http://localhost:3000
     ports:
-      - "5252:8000"
+      - "8000:8000"
     volumes:
-      - ./backend:/app/backend_dev:cached
-      - backend_static:/app/staticfiles
+      - ./backend:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/mediafiles
+    networks:
+      - echomon-network
     command: >
       sh -c "python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
@@ -40,20 +56,26 @@ services:
     container_name: echomon-proto-frontend
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev
+      dockerfile: ../docker/frontend/Dockerfile
     restart: always
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:5252
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app:cached
-      - /app/node_modules
-      - /app/.next
     depends_on:
       - backend
-    command: npm run dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - echomon-network
+
+networks:
+  echomon-network:
+    driver: bridge
 
 volumes:
   postgres_data:
-  backend_static:
+  static_volume:
+  media_volume:

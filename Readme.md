@@ -15,8 +15,8 @@ EchoMon is a comprehensive network monitoring solution that combines a Next.js f
 - Admin dashboard for network oversight
 - RESTful API endpoints
 - Responsive design for all devices
-- Cyber news feed and updates
-- Interactive cybersecurity quiz
+- EchoMon security news feed and updates
+- Interactive security quiz
 
 ## Getting Started
 
@@ -162,8 +162,8 @@ Regular speed tests track your network performance over time, allowing you to id
 ### Subscriber Management
 Manage users who have access to monitoring capabilities with different permission levels.
 
-### Cybersecurity News
-Stay updated with the latest cybersecurity news and alerts directly in your dashboard.
+### EchoMon Security News
+Stay updated with the latest security news and alerts directly in your dashboard.
 
 ## Technology Stack
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 
 interface RefreshIndicatorProps {
   lastUpdated: Date | null;
@@ -26,34 +26,20 @@ export function RefreshIndicator({
     const days = Math.floor(hours / 24);
     return `${days} day${days > 1 ? 's' : ''} ago`;
   };
-  
+
   return (
     <div>
-      {lastUpdated && (
-        <span>
-          Updated {formatTimeAgo(lastUpdated)}
-        </span>
-      )}
-      <button
+      <Button 
         onClick={onRefresh}
         disabled={isLoading}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M21 12a9 9 0 0 1-9 9c-4.97 0-9-4.03-9-9s4.03-9 9-9h3" />
-          <path d="M18 3v6h-6" />
-        </svg>
         {isLoading ? 'Refreshing...' : 'Refresh'}
-      </button>
+      </Button>
+      {lastUpdated && (
+        <span>
+          Last updated: {formatTimeAgo(lastUpdated)}
+        </span>
+      )}
     </div>
   );
 }

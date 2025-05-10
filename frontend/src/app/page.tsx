@@ -1,13 +1,13 @@
 'use client';
 
-import { NetworkDevices } from '@/components/NetworkDevices';
-import { SpeedTest } from '@/components/SpeedTest';
+import { NetworkDevices } from '@/components/network/NetworkDevices';
+import { SpeedTest } from '@/components/network/SpeedTest';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useNetworkPermissions } from '@/lib/hooks/useNetworkPermissions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { RSSFeed } from '@/components/RSSFeed';
-import { EchoQuiz } from '@/components/EchoQuiz';
+import { RSSFeed } from '@/components/news/RSSFeed';
+import { EchoQuiz } from '@/components/quiz/EchoQuiz';
 import { useEffect, useState } from 'react';
 import { newsAPI } from '@/services/api';
 
@@ -40,33 +40,33 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      <main className="flex-grow container mx-auto p-4 md:p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Welcome to EchoMon</h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300">
+    <div>
+      <main>
+        <div>
+          <h1>Welcome to EchoMon</h1>
+          <p>
             Your comprehensive network monitoring solution
           </p>
         </div>
 
         {loading ? (
-          <div className="grid gap-6 md:grid-cols-2">
+          <div>
             {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="h-[200px] w-full" />
+              <div key={i}>Loading...</div>
             ))}
           </div>
         ) : error ? (
-          <Alert variant="destructive">
-            <AlertDescription>
+          <div>
+            <p>
               {error}. Some features may not be available in your browser.
-            </AlertDescription>
-          </Alert>
+            </p>
+          </div>
         ) : !networkStatus || !speedTest ? (
-          <Alert>
-            <AlertDescription>
+          <div>
+            <p>
               To use all features of EchoMon, please grant permission to access your network status and perform speed tests. 
               These permissions are required to:
-              <ul className="list-disc list-inside mt-2">
+              <ul>
                 <li>Monitor connected devices on your network</li>
                 <li>Measure network speed and performance</li>
                 <li>Provide real-time network statistics</li>
@@ -75,9 +75,9 @@ export default function Home() {
           </Alert>
         ) : null}
 
-        <div className="grid gap-6 mt-8">
+        <div>
           {/* Main dashboard cards */}
-          <div className="grid md:grid-cols-2 gap-6">
+          <div>
             <SpeedTest permissionsGranted={speedTest} />
             <NetworkDevices permissionsGranted={networkStatus} />
             
@@ -88,25 +88,24 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 {newsLoading ? (
-                  <div className="space-y-4">
+                  <div>
                     {[...Array(3)].map((_, i) => (
-                      <Skeleton key={i} className="h-4 w-full" />
+                      <Skeleton key={i} />
                     ))}
                   </div>
                 ) : newsError ? (
-                  <p className="text-red-500">{newsError}</p>
+                  <p>{newsError}</p>
                 ) : (
-                  <div className="space-y-4">
+                  <div>
                     {newsItems.map((item) => (
-                      <div key={item.id} className="space-y-1">
-                        <h3 className="font-medium">{item.title}</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <div key={item.id}>
+                        <h3>{item.title}</h3>
+                        <p>
                           {new Date(item.publish_date).toLocaleDateString()}
                         </p>
-                        <p className="text-sm">{item.summary}</p>
+                        <p>{item.summary}</p>
                         <a
                           href={`/news#${item.id}`}
-                          className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
                         >
                           Read more →
                         </a>
@@ -122,7 +121,7 @@ export default function Home() {
           </div>
 
           {/* EchoMon Quiz Section */}
-          <div className="mt-8">
+          <div>
             <EchoQuiz />
           </div>
         </div>

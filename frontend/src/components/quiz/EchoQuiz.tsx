@@ -1,58 +1,22 @@
-// filepath: /Users/sailendra/Documents/EchoMon-proto/frontend/src/components/EchoQuiz.tsx
+'use client';
+
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-
-interface QuizQuestion {
-  question: string;
-  options: string[];
-  correctAnswer: number;
-}
-
-const quizQuestions: QuizQuestion[] = [
-  {
-    question: "What is a strong password practice?",
-    options: [
-      "Using the same password for all accounts",
-      "Using a combination of letters, numbers, and special characters",
-      "Using your birth date",
-      "Using common words"
-    ],
-    correctAnswer: 1
-  },
-  {
-    question: "How can you identify a potential phishing email?",
-    options: [
-      "The sender's email address looks legitimate",
-      "It creates urgency to act immediately",
-      "It has a professional layout",
-      "It's from a known company"
-    ],
-    correctAnswer: 1
-  },
-  {
-    question: "What is two-factor authentication?",
-    options: [
-      "Using two different passwords",
-      "Using a password and a security question",
-      "Using something you know and something you have",
-      "Using two different email addresses"
-    ],
-    correctAnswer: 2
-  }
-];
+import { EchoQuizService } from './EchoQuizService';
 
 export function EchoQuiz() {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [currentQuestion] = useState(() => {
-    // Randomly select a question when component mounts
-    const randomIndex = Math.floor(Math.random() * quizQuestions.length);
-    return quizQuestions[randomIndex];
+    // Get a random question from our service
+    return EchoQuizService.getRandomQuestion();
   });
+  const [showExplanation, setShowExplanation] = useState(false);
 
   const handleSubmit = () => {
     if (selectedAnswer !== null) {
       setIsSubmitted(true);
+      setTimeout(() => setShowExplanation(true), 1000);
     }
   };
 
@@ -96,6 +60,13 @@ export function EchoQuiz() {
               {selectedAnswer === currentQuestion.correctAnswer
                 ? 'Correct! Well done!'
                 : `Incorrect. The correct answer is: ${currentQuestion.options[currentQuestion.correctAnswer]}`}
+              
+              {showExplanation && (
+                <div>
+                  <h4>Explanation:</h4>
+                  <p>{currentQuestion.explanation}</p>
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -87,31 +87,30 @@ export function AuthDialog({ isOpen, onClose }: AuthDialogProps) {
 
   return (
     <Dialog isOpen={isOpen} onClose={onClose}>
-      <div className="p-6">
-        <h2 className="text-2xl font-bold mb-4">
+      <div>
+        <h2>
           {isLogin ? 'Login' : 'Register'}
         </h2>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit}>
           {error && (
-            <Alert variant="destructive">
-              <AlertDescription className="flex items-center">
+            <div>
+              <div>
                 <span>{error}</span>
                 {showRegisterSuggestion && (
                   <button
                     type="button"
                     onClick={switchMode}
-                    className="ml-2 underline hover:text-blue-600"
                   >
                     Register now
                   </button>
                 )}
-              </AlertDescription>
-            </Alert>
+              </div>
+            </div>
           )}
 
           <div>
-            <label htmlFor="username" className="block text-sm font-medium mb-1">
+            <label htmlFor="username">
               Username
             </label>
             <input
@@ -119,7 +118,6 @@ export function AuthDialog({ isOpen, onClose }: AuthDialogProps) {
               type="text"
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-              className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
               required
             />
           </div>
@@ -127,7 +125,7 @@ export function AuthDialog({ isOpen, onClose }: AuthDialogProps) {
           {!isLogin && (
             <>
               <div>
-                <label htmlFor="firstName" className="block text-sm font-medium mb-1">
+                <label htmlFor="firstName">
                   First Name
                 </label>
                 <input
@@ -135,13 +133,12 @@ export function AuthDialog({ isOpen, onClose }: AuthDialogProps) {
                   type="text"
                   value={formData.firstName}
                   onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="lastName" className="block text-sm font-medium mb-1">
+                <label htmlFor="lastName">
                   Last Name
                 </label>
                 <input
@@ -149,13 +146,12 @@ export function AuthDialog({ isOpen, onClose }: AuthDialogProps) {
                   type="text"
                   value={formData.lastName}
                   onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-1">
+                <label htmlFor="email">
                   Email
                 </label>
                 <input
@@ -163,7 +159,6 @@ export function AuthDialog({ isOpen, onClose }: AuthDialogProps) {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
                   required
                 />
               </div>
@@ -171,7 +166,7 @@ export function AuthDialog({ isOpen, onClose }: AuthDialogProps) {
           )}
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-1">
+            <label htmlFor="password">
               Password
             </label>
             <input
@@ -179,7 +174,6 @@ export function AuthDialog({ isOpen, onClose }: AuthDialogProps) {
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
               required
               minLength={8}
             />
@@ -188,18 +182,16 @@ export function AuthDialog({ isOpen, onClose }: AuthDialogProps) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
             {loading ? 'Loading...' : (isLogin ? 'Login' : 'Register')}
           </button>
         </form>
 
         {!showRegisterSuggestion && (
-          <div className="mt-4 text-center">
+          <div>
             <button
               type="button"
               onClick={switchMode}
-              className="text-blue-600 hover:underline"
             >
               {isLogin ? "Don't have an account? Register" : 'Already have an account? Login'}
             </button>
